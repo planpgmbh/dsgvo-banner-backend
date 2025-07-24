@@ -13,7 +13,8 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.services.backend_dsgvobanner.loadbalancer.server.port=3001"
-      - "traefik.http.routers.backend_dsgvobanner.rule=Host(`dsgvobanner.plan-p.com`)"
+      - "traefik.http.routers.backend_dsgvobanner.rule=Host(`dsgvobanner.plan-p.com`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend_dsgvobanner.priority=10"
       - "traefik.http.routers.backend_dsgvobanner.entrypoints=websecure"
       - "traefik.http.routers.backend_dsgvobanner.tls=true"
       - "traefik.http.routers.backend_dsgvobanner.tls.certresolver=http-resolver"
@@ -22,6 +23,24 @@ services:
       - proxy
     depends_on:
       - db_dsgvobanner
+
+  frontend_dsgvobanner:
+    build:
+      context: ./project
+      dockerfile: project.dockerfile
+    container_name: frontend_dsgvobanner
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.services.frontend_dsgvobanner.loadbalancer.server.port=80"
+      - "traefik.http.routers.frontend_dsgvobanner.rule=Host(`dsgvobanner.plan-p.com`)"
+      - "traefik.http.routers.frontend_dsgvobanner.priority=5"
+      - "traefik.http.routers.frontend_dsgvobanner.entrypoints=websecure"
+      - "traefik.http.routers.frontend_dsgvobanner.tls=true"
+      - "traefik.http.routers.frontend_dsgvobanner.tls.certresolver=http-resolver"
+    networks:
+      - proxy
 
   db_dsgvobanner:
     image: mariadb:11

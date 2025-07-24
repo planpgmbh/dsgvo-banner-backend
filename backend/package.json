@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "commonjs",
   "scripts": {
-    "backend": "node backend/server.cjs",
+    "backend": "node data/server.cjs",
     "start": "npm run backend"
   },
   "dependencies": {
