@@ -1,7 +1,7 @@
 services:
   backend_dsgvobanner:
     build:
-      context: .
+      context: ./backend
       dockerfile: backend.dockerfile
     container_name: backend_dsgvobanner
     restart: unless-stopped
@@ -38,7 +38,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     volumes:
       - /etc/docker/databases/dsgvobanner:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - db_dsgvobanner
       - db_backup
