@@ -27,11 +27,9 @@ const PORT = process.env.PORT || 3001;
 // Security
 app.use(helmet());
 
-// CORS - Restrict to a specific origin in production
+// CORS - Allow all origins for public routes
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? (process.env.CORS_ORIGIN || 'https://your-frontend-domain.com') 
-    : '*',
+  origin: '*', // Allow all origins
 };
 app.use(cors(corsOptions));
 

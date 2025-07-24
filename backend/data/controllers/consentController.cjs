@@ -2,11 +2,8 @@ const { pool } = require('../config/database.cjs');
 const catchAsync = require('../utils/catchAsync.cjs');
 
 const createConsentLog = catchAsync(async (req, res) => {
-  const { project_id, consents, ip } = req.body;
-
-  if (!project_id || !consents || !ip) {
-    return res.status(400).json({ error: 'Missing required fields' });
-  }
+  const { project_id, accepted_services, is_accept_all } = req.body;
+  const ip = req.ip; // Get IP from the request object
 
   // Pseudonymize IP
   const pseudoIp = ip.split('.').slice(0, 3).join('.') + '.0';
@@ -22,10 +19,16 @@ const createConsentLog = catchAsync(async (req, res) => {
   expiryDate.setMonth(expiryDate.getMonth() + expiryMonths);
 
   // Save consent
+  const consentsPayload = {
+    accepted_services,
+    is_accept_all,
+    user_agent: req.headers['user-agent']
+  };
+
   await pool.execute(`
     INSERT INTO consent_logs (project_id, consents, ip_pseudonymized, expires_at)
     VALUES (?, ?, ?, ?)
-  `, [project_id, JSON.stringify(consents), pseudoIp, expiryDate]);
+  `, [project_id, JSON.stringify(consentsPayload), pseudoIp, expiryDate]);
 
   res.status(201).json({ 
     success: true, 

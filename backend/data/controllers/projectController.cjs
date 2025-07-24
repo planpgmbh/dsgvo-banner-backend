@@ -15,8 +15,11 @@ const getPublicProjectConfig = catchAsync(async (req, res) => {
   const [categories] = await pool.execute('SELECT * FROM cookie_categories WHERE project_id = ? ORDER BY sort_order', [id]);
   const [services] = await pool.execute('SELECT * FROM cookie_services WHERE project_id = ? ORDER BY name', [id]);
 
+  const project = projects[0];
   res.json({
-    project: projects[0],
+    banner_html: project.custom_html,
+    banner_css: project.custom_css,
+    project,
     categories,
     services
   });
