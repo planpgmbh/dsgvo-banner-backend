@@ -1,0 +1,53 @@
+services:
+  backend_dsgvobanner:
+    build:
+      context: .
+      dockerfile: backend.dockerfile
+    container_name: backend_dsgvobanner
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.services.backend_dsgvobanner.loadbalancer.server.port=3001"
+      - "traefik.http.routers.backend_dsgvobanner.rule=Host(`dsgvobanner.plan-p.com`)"
+      - "traefik.http.routers.backend_dsgvobanner.entrypoints=websecure"
+      - "traefik.http.routers.backend_dsgvobanner.tls=true"
+      - "traefik.http.routers.backend_dsgvobanner.tls.certresolver=http-resolver"
+    networks:
+      - db_dsgvobanner
+      - proxy
+    depends_on:
+      - db_dsgvobanner
+
+  db_dsgvobanner:
+    image: mariadb:11
+    container_name: db_dsgvobanner
+    restart: unless-stopped
+    ports:
+      - "3318:3306"
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - /etc/docker/databases/dsgvobanner:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - db_dsgvobanner
+      - db_backup
+
+networks:
+  db_dsgvobanner:
+    name: db_dsgvobanner
+    driver: bridge
+  db_backup:
+    external: true
+  proxy:
+    external: true
