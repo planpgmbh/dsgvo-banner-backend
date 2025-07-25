@@ -1,5 +1,4 @@
 name: Auto-Deploy to Server
-
 on:
   push:
     branches:
