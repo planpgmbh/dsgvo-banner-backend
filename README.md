@@ -12,6 +12,7 @@ Dieses Repository enthält ein vollständiges DSGVO-konformes Cookie-Banner-Syst
 - **Mehrsprachige Unterstützung** (Standard: Deutsch).
 - **Responsive Design** für Desktops, Tablets und Smartphones.
 
+
 ## 🛠️ Technologie-Stack
 
 Das Projekt ist als Monorepo mit zwei Hauptkomponenten aufgebaut:
