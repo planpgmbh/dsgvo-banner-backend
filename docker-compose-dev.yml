@@ -1,0 +1,56 @@
+services:
+  backend_dsgvobanner:
+    build:
+      context: ./backend
+      dockerfile: backend.dockerfile
+    container_name: backend_dsgvobanner_dev
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db_dsgvobanner_dev
+    networks:
+      - db_dsgvobanner_dev
+    depends_on:
+      - db_dsgvobanner_dev
+
+  www_dsgvobanner:
+    build:
+      context: ./project
+      dockerfile: project.dockerfile
+    container_name: www_dsgvobanner_dev
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    networks:
+      - default
+
+  db_dsgvobanner_dev:
+    image: mariadb:11
+    container_name: db_dsgvobanner_dev
+    restart: unless-stopped
+    ports:
+      - "3319:3306"
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - db_dsgvobanner_dev_data:/var/lib/mysql
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - db_dsgvobanner_dev
+
+volumes:
+  db_dsgvobanner_dev_data:
+    name: db_dsgvobanner_dev_data
+
+networks:
+  db_dsgvobanner_dev:
+    name: db_dsgvobanner_dev
+    driver: bridge
