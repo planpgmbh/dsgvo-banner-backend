@@ -20,6 +20,7 @@ if (!process.env.JWT_SECRET) {
 }
 
 const app = express();
+app.set('trust proxy', true); // Trust the X-Forwarded-For header
 const PORT = process.env.PORT || 3001;
 
 // --- Middleware ---

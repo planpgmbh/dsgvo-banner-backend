@@ -13,17 +13,168 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const [formData, setFormData] = useState({
     name: '',
     domain: '',
-    banner_title: 'Cookie-Einstellungen',
-    banner_text: 'Wir verwenden Cookies, um Ihnen die bestmögliche Erfahrung auf unserer Website zu bieten.',
-    accept_all_text: 'Alle akzeptieren',
+    banner_title: 'Diese Webseite verwendet Cookies',
+    banner_text: 'Wir verwenden Cookies, um Inhalte und Anzeigen zu personalisieren, Funktionen für soziale Medien anbieten zu können und die Zugriffe auf unsere Website zu analysieren. Außerdem geben wir Informationen zu Ihrer Verwendung unserer Website an unsere Partner für soziale Medien, Werbung und Analysen weiter. <a class="uc-link" href="#" id="uc-details">Details zeigen</a>',
+    accept_all_text: 'Cookies zulassen',
     accept_selection_text: 'Auswahl erlauben',
-    necessary_only_text: 'Nur notwendige Cookies',
+    necessary_only_text: 'Nur notwendige Cookies verwenden',
+    accept_all_selector: '#uc-allow',
+    accept_selection_selector: '#uc-save',
+    necessary_only_selector: '#uc-necessary',
     language: 'de',
     expiry_months: 12,
     about_cookies_text: 'Cookies sind kleine Textdateien, die von Websites verwendet werden, um die Benutzererfahrung effizienter zu gestalten. Laut Gesetz können wir Cookies auf Ihrem Gerät speichern, wenn diese für den Betrieb dieser Seite unbedingt notwendig sind. Für alle anderen Cookie-Typen benötigen wir Ihre Erlaubnis.',
-    custom_html: '<div id="cookiebanner" lang="[#LANGUAGE#]" dir="[#TEXTDIRECTION#]" ng-non-bindable>\n  <div id="c-left">\n    <p class="c-header">[#TITLE#]</p>\n    <p class="c-message">[#TEXT#]</p>\n  </div>\n  <div id="c-right">\n    <a href="javascript:void(0)" onclick="acceptAllCookies()" class="c-button">OK</a>\n  </div>\n  <div style="clear:both"></div>\n</div>',
-    custom_css: '@media screen and (max-width:720px) {\n  #cookiebanner a.c-button { \n    width:100%; \n    box-sizing:border-box; \n    text-align:center; \n    margin-bottom:20px;\n  } \n  #c-right { \n    float:none;\n  }\n  #c-left { \n    float:none;\n  }   \n  #cookiebanner p.c-message { \n    margin-bottom:20px;\n  }   \n}    \n\n@media screen and (min-width:720px) {\n  #cookiebanner #c-left { \n    float:left; \n    max-width:80%;\n  }\n  #cookiebanner #c-right { \n    float:right; \n  }\n}\n\n#cookiebanner { \n  box-sizing: border-box; \n  background-color:rgb(36,36,39); \n  opacity: 0.9; \n  width:100%; \n  padding:25px 40px; \n  position: fixed; \n  z-index: 2147483645; \n  bottom:0px;\n}\n\n#cookiebanner p { \n  font-size:14px; \n  line-height:1.4;\n}\n\n#cookiebanner .c-header { \n  text-transform:uppercase; \n  color:#fff; \n  font-weight:bold; \n  margin-bottom:4px;\n}\n\n#cookiebanner p.c-message {\n  font-size:14px; \n  color:#999;\n}\n\n#cookiebanner a { \n  font-weight:bold; \n  color:#999;\n}\n\n#cookiebanner a:hover { \n  color:#fff;\n}\n\n#cookiebanner a.c-button { \n  border-radius: 4px;\n  background-color: rgb(255,255,255);\n  box-shadow: 0 2px 0 0 rgb(221,221,221);\n  border:1px solid rgb(221,221,221);\n  padding:12px 60px;\n  text-decoration:none;\n  display:inline-block;\n  vertical-align:middle;\n  margin-top:10px;\n  color:#666;\n  font-size:16px;\n  transition:.2s;\n}\n\n#cookiebanner a.c-button:hover { \n  box-shadow:none; \n  background-color:#f8f8f8;\n}',
-    custom_js: 'var cookieBannerSliderPos = 0;\n\nfunction showCookieBanner() {\n    var cookiebanner = document.getElementById("cookiebanner");\n    var dialogHeight = parseInt(cookiebanner.offsetHeight);\n    cookiebanner.style.bottom = (cookieBannerSliderPos - dialogHeight) + "px";\n    cookieBannerSliderPos += 4;\n    if (cookieBannerSliderPos < dialogHeight) {\n        setTimeout(function () {\n            showCookieBanner();\n        }, 1);\n    } else {\n        cookieBannerSliderPos = 0;\n        cookiebanner.style.bottom = "0px";\n    }\n}\n\nfunction hideCookieBanner() {\n    var cookiebanner = document.getElementById("cookiebanner");\n    cookiebanner.style.display = "none";\n}\n\nfunction acceptAllCookies() {\n    // Hier können Sie die Logik für das Akzeptieren aller Cookies implementieren\n    hideCookieBanner();\n}'
+    custom_html: `<div class="uc-banner-wrap" role="dialog" aria-labelledby="uc-title" aria-describedby="uc-desc">
+    <section class="uc-banner">
+      <div>
+        <h2 id="uc-title" class="uc-headline">[#TITLE#]</h2>
+        <p id="uc-desc" class="uc-desc">
+          [#TEXT#]        
+        </p>
+
+        <div class="uc-groups" aria-label="Cookie-Kategorien">
+          <div class="uc-group">
+            <span class="uc-label">Notwendig</span>
+            <label class="uc-switch" title="Notwendig">
+              <input type="checkbox" checked disabled aria-label="Notwendig immer aktiv">
+              <span class="uc-switch-track"><span class="uc-switch-thumb"></span></span>
+            </label>
+          </div>
+          <div class="uc-group">
+            <span class="uc-label">Präferenzen</span>
+            <label class="uc-switch" title="Präferenzen">
+              <input id="uc-pref" type="checkbox" aria-label="Präferenzen">
+              <span class="uc-switch-track"><span class="uc-switch-thumb"></span></span>
+            </label>
+          </div>
+          <div class="uc-group">
+            <span class="uc-label">Statistiken</span>
+            <label class="uc-switch" title="Statistiken">
+              <input id="uc-stat" type="checkbox" aria-label="Statistiken">
+              <span class="uc-switch-track"><span class="uc-switch-thumb"></span></span>
+            </label>
+          </div>
+          <div class="uc-group">
+            <span class="uc-label">Marketing</span>
+            <label class="uc-switch" title="Marketing">
+              <input id="uc-mkt" type="checkbox" aria-label="Marketing">
+              <span class="uc-switch-track"><span class="uc-switch-thumb"></span></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="uc-cta">
+        <button class="uc-btn uc-btn-primary" id="uc-allow">[#ACCEPT_ALL_TEXT#]</button>
+        <button class="uc-btn uc-btn-secondary" id="uc-necessary">[#NECESSARY_ONLY_TEXT#]</button>
+        <button class="uc-btn uc-btn-outline" id="uc-save">[#ACCEPT_SELECTION_TEXT#]</button>
+      </div>
+    </section>
+  </div>`,
+    custom_css: `:root{
+      --uc-blue:#0a49ff;
+      --uc-text:#0b0b0c;
+      --uc-muted:#6b7280;
+      --uc-bg:#ffffff;
+      --uc-switch-off:#e5e7eb;
+      --uc-switch-on:#111827;
+      --maxw:1200px;
+      --radius:12px;
+      --btnw:340px; /* gleiche Breite für beide Buttons */
+    }
+
+    .uc-banner-wrap{
+      position:fixed;left:0;right:0;bottom:0;z-index:9999;
+      display:flex;justify-content:center;padding:24px;
+    }
+    .uc-banner{
+      width:100%;max-width:var(--maxw);
+      background:var(--uc-bg);border-radius:16px;
+      padding:24px;display:grid;gap:18px;
+      grid-template-columns: 1fr auto;
+    }
+
+    .uc-headline{margin:0 0 8px 0;font-weight:700;font-size:18px}
+    .uc-desc{margin:0;color:#111827}
+    .uc-link{
+      color:var(--uc-blue);font-weight:600;text-decoration:none;margin-left:.35rem;
+    }
+
+    .uc-groups{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px}
+    .uc-group{display:flex;align-items:center;gap:10px}
+    .uc-label{font-weight:600}
+
+    .uc-switch{position:relative;display:inline-block;width:56px;height:32px;flex:none}
+    .uc-switch input{appearance:none;-webkit-appearance:none;width:56px;height:32px;margin:0;outline:none}
+    .uc-switch-track{position:absolute;inset:0;border-radius:999px;background:var(--uc-switch-on);transition:background .2s ease}
+    .uc-switch input:not(:checked)+.uc-switch-track{background:var(--uc-switch-off)}
+    .uc-switch-thumb{position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:999px;background:#fff;transition:transform .2s ease;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+    .uc-switch input:checked + .uc-switch-track .uc-switch-thumb{transform:translateX(24px)}
+    .uc-switch input:disabled{cursor:not-allowed;opacity:.7}
+
+    .uc-cta{display:flex;flex-direction:column;gap:12px;align-items:flex-end;justify-content:flex-start}
+    .uc-btn{
+      appearance:none;border:0;cursor:pointer;border-radius:10px;padding:14px 22px;font-weight:800;letter-spacing:.2px;
+      width:var(--btnw); /* gleiche Breite */
+    }
+    .uc-btn-primary{background:var(--uc-blue);color:#fff}
+    .uc-btn-outline{background:#fff;color:var(--uc-text);border:2px solid var(--uc-switch-off)}
+    .uc-btn-secondary{background:var(--uc-switch-off);color:var(--uc-text);}
+
+    @media (max-width: 960px){
+      .uc-banner{grid-template-columns:1fr}
+      .uc-cta{align-items:stretch}
+      .uc-btn{width:100%}
+    }`,
+    custom_js: `const KEY = "uc-consent";
+    const wrap = document.querySelector(".uc-banner-wrap");
+    const allowBtn = document.getElementById("uc-allow");
+    const necBtn = document.getElementById("uc-necessary");
+    const details = document.getElementById("uc-details");
+    const inputs = {
+      pref: document.getElementById("uc-pref"),
+      stat: document.getElementById("uc-stat"),
+      mkt:  document.getElementById("uc-mkt")
+    };
+
+    try{
+      const saved = JSON.parse(localStorage.getItem(KEY) || "null");
+      if(saved && saved.version===1){
+        wrap.style.display = "none";
+      }
+    }catch(_) {}
+
+    allowBtn.addEventListener("click", () => {
+      saveConsent({preferences:true,statistics:true,marketing:true});
+      wrap.style.display = "none";
+    });
+
+    necBtn.addEventListener("click", () => {
+      inputs.pref.checked = false;
+      inputs.stat.checked = false;
+      inputs.mkt.checked  = false;
+      saveConsent({preferences:false,statistics:false,marketing:false});
+      wrap.style.display = "none";
+    });
+
+    details.addEventListener("click", (e)=>{
+      e.preventDefault();
+      alert("Hier würden detaillierte Cookie-Informationen erscheinen – analog zum Usercentrics-Standard.");
+    });
+
+    function saveConsent({preferences,statistics,marketing}){
+      const payload = {
+        version:1,
+        timestamp:new Date().toISOString(),
+        categories:{
+          necessary:true,
+          preferences,
+          statistics,
+          marketing
+        }
+      };
+      localStorage.setItem(KEY, JSON.stringify(payload));
+    }`
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

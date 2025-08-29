@@ -484,6 +484,53 @@ export const ProjectDetail: React.FC = () => {
     setExpandedCategory(expandedCategory === categoryId ? null : categoryId);
   };
 
+  const getConsentDisplayString = (log: ConsentLog) => {
+    try {
+      const consentsData = JSON.parse(log.consents);
+
+      if (consentsData.is_accept_all) {
+        return 'Alle Cookies';
+      }
+
+      // New, correct logic: Directly use the stored category names
+      if (Array.isArray(consentsData.accepted_category_names) && consentsData.accepted_category_names.length > 0) {
+        const names = consentsData.accepted_category_names;
+        
+        // Sort to ensure "Nur Notwendige" is predictable
+        const sortedNames = [...names].sort();
+
+        if (sortedNames.length === 1 && sortedNames[0] === 'Notwendige Cookies') {
+          return 'Nur Notwendige';
+        }
+        // Filter out "Notwendige Cookies" from the main display if other categories are present
+        const optionalNames = sortedNames.filter(name => name !== 'Notwendige Cookies');
+        if (optionalNames.length > 0) {
+          return optionalNames.join(', ');
+        }
+        // If only "Notwendige" was present after all
+        return 'Nur Notwendige';
+      }
+
+      // Fallback for very old data formats without `accepted_category_names`
+      const acceptedServiceIds = consentsData.accepted_services || [];
+      if (!Array.isArray(acceptedServiceIds)) { // Old object-based format
+          const oldAccepted = Object.entries(acceptedServiceIds)
+            .filter(([_, accepted]) => accepted)
+            .map(([catId, _]) => fixedCategories.find(c => c.id === parseInt(catId))?.name)
+            .filter(Boolean);
+          
+          if (oldAccepted.length === 1 && oldAccepted[0] === 'Notwendige Cookies') return 'Nur Notwendige';
+          return oldAccepted.join(', ') || 'Keine Angabe';
+      }
+
+      return 'Keine Angabe';
+
+    } catch (e) {
+      console.error("Error parsing consents for display:", e, log.consents);
+      return 'Fehlerhafte Daten';
+    }
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     // You could add a toast notification here
@@ -1295,54 +1342,24 @@ function acceptAllCookies() {
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                          {consentLogs.slice(0, 10).map((log) => {
-                            let consentsData;
-                            try {
-                              // Parse once - the backend sends a JSON string
-                              consentsData = JSON.parse(log.consents);
-                            } catch (e) {
-                              console.error("Error parsing consents:", e, log.consents);
-                              consentsData = {};
-                            }
-                            
-                            const acceptedCategories = Object.entries(consentsData)
-                              .filter(([_, accepted]) => accepted)
-                              .map(([categoryId, _]) => {
-                                const categoryNames = {
-                                  '1': 'Notwendig',
-                                  '2': 'Präferenzen',
-                                  '3': 'Statistik',
-                                  '4': 'Marketing'
-                                };
-                                return categoryNames[categoryId as keyof typeof categoryNames] || `Kategorie ${categoryId}`;
-                              });
-
-                            return (
-                              <tr key={log.id}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {new Date(log.created_at).toLocaleString('de-DE')}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {log.ip_pseudonymized}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                  <div className="flex flex-wrap gap-1">
-                                    {acceptedCategories.map((category, index) => (
-                                      <span
-                                        key={index}
-                                        className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                                      >
-                                        {category}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {new Date(log.expires_at).toLocaleDateString('de-DE')}
-                                </td>
-                              </tr>
-                            );
-                          })}
+                          {consentLogs.slice(0, 10).map((log) => (
+                            <tr key={log.id}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {new Date(log.created_at).toLocaleString('de-DE')}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {log.ip_pseudonymized}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  {getConsentDisplayString(log)}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {new Date(log.expires_at).toLocaleDateString('de-DE')}
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -1389,12 +1406,23 @@ function acceptAllCookies() {
       )}
 
       {showBannerPreview && (
-        <BannerPreview
-          project={editableProject}
-          projectCookies={projectCookies}
-          fixedCategories={fixedCategories}
-          onClose={() => setShowBannerPreview(false)}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-4 max-w-3xl w-full relative">
+            <button 
+              onClick={() => setShowBannerPreview(false)}
+              className="absolute top-2 right-2 p-1 rounded-full text-gray-500 hover:bg-gray-200"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <BannerPreview
+              project={{
+                ...editableProject,
+                cookies: projectCookies,
+                categories: fixedCategories,
+              }}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

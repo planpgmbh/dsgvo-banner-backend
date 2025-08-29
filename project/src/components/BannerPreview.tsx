@@ -51,7 +51,7 @@ export const BannerPreview: React.FC<BannerPreviewProps> = ({ project }) => {
   const cookies = project.cookies || [];
 
   const getDefaultText = (key: string) => {
-    const defaults = {
+    const defaults: { [key: string]: string } = {
       banner_title: 'Cookie-Einstellungen',
       banner_text: 'Wir verwenden Cookies, um Ihnen die bestmögliche Erfahrung auf unserer Website zu bieten.',
       accept_all_text: 'Alle akzeptieren',
@@ -59,7 +59,7 @@ export const BannerPreview: React.FC<BannerPreviewProps> = ({ project }) => {
       necessary_only_text: 'Nur notwendige Cookies',
       about_cookies_text: 'Cookies sind kleine Textdateien, die von Websites verwendet werden, um die Benutzererfahrung zu verbessern. Diese Website verwendet verschiedene Arten von Cookies. Einige Cookies werden von Drittanbietern platziert, die auf unseren Seiten erscheinen.'
     };
-    return project[key as keyof typeof project] || defaults[key as keyof typeof defaults];
+    return project[key as keyof typeof project] as string || defaults[key];
   };
 
   // Function to replace placeholders in custom HTML
@@ -72,9 +72,8 @@ export const BannerPreview: React.FC<BannerPreviewProps> = ({ project }) => {
       .replace(/\[#TEXTDIRECTION#\]/g, textDirection)
       .replace(/\[#TITLE#\]/g, getDefaultText('banner_title'))
       .replace(/\[#TEXT#\]/g, getDefaultText('banner_text'))
-      .replace(/\[#ACCEPT_ALL#\]/g, getDefaultText('accept_all_text'))
-      .replace(/\[#ACCEPT_SELECTION#\]/g, getDefaultText('accept_selection_text'))
-      .replace(/\[#NECESSARY_ONLY#\]/g, getDefaultText('necessary_only_text'));
+      .replace(/\[#ACCEPT_ALL_TEXT#\]/g, getDefaultText('accept_all_text'))
+      .replace(/\[#NECESSARY_ONLY_TEXT#\]/g, getDefaultText('necessary_only_text'));
   };
 
   return (
@@ -90,7 +89,7 @@ export const BannerPreview: React.FC<BannerPreviewProps> = ({ project }) => {
               )}
               
               {/* Custom HTML with processed placeholders */}
-              <div 
+              <div
                 dangerouslySetInnerHTML={{ 
                   __html: processCustomHtml(project.custom_html) 
                 }} 
@@ -158,7 +157,12 @@ export const BannerPreview: React.FC<BannerPreviewProps> = ({ project }) => {
                             </button>
                           </div>
                           <label className="dsgvo-switch">
-                            <input type="checkbox" checked={category.required} disabled={category.required} />
+                            <input 
+                              type="checkbox" 
+                              data-category-id={category.id}
+                              defaultChecked={category.required} 
+                              disabled={category.required} 
+                            />
                             <span className="dsgvo-slider"></span>
                           </label>
                         </div>

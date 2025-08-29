@@ -2,11 +2,16 @@ const { pool } = require('../config/database.cjs');
 const catchAsync = require('../utils/catchAsync.cjs');
 
 const createConsentLog = catchAsync(async (req, res) => {
-  const { project_id, accepted_services, is_accept_all } = req.body;
-  const ip = req.ip; // Get IP from the request object
+  const { project_id, accepted_services, accepted_category_names, is_accept_all } = req.body;
+  let ip = req.ip; // Get IP from the request object
+
+  // Handle IPv6-mapped IPv4 addresses
+  if (ip.startsWith('::ffff:')) {
+    ip = ip.substring(7);
+  }
 
   // Pseudonymize IP
-  const pseudoIp = ip.split('.').slice(0, 3).join('.') + '.0';
+  const pseudoIp = ip.split('.').slice(0, 3).join('.') + '.XXX';
 
   // Get project expiry duration
   const [projects] = await pool.execute('SELECT expiry_months FROM projects WHERE id = ?', [project_id]);
@@ -21,6 +26,7 @@ const createConsentLog = catchAsync(async (req, res) => {
   // Save consent
   const consentsPayload = {
     accepted_services,
+    accepted_category_names: accepted_category_names || [],
     is_accept_all,
     user_agent: req.headers['user-agent']
   };
