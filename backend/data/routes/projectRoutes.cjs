@@ -4,7 +4,8 @@ const {
   createProject,
   getProjectById,
   updateProject,
-  deleteProject
+  deleteProject,
+  createDefaultCategories
 } = require('../controllers/projectController.cjs');
 const {
   createProjectValidationRules,
@@ -19,5 +20,6 @@ router.post('/', createProjectValidationRules(), validateRequest, createProject)
 router.get('/:id', getProjectById);
 router.put('/:id', updateProjectValidationRules(), validateRequest, updateProject);
 router.delete('/:id', deleteProject);
+router.post('/:id/create-categories', createDefaultCategories);
 
 module.exports = router;

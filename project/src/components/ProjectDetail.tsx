@@ -399,6 +399,29 @@ export const ProjectDetail: React.FC = () => {
     }
   };
 
+  const handleCreateDefaultCategories = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/projects/${id}/create-categories`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        setSaveMessage('Standard-Kategorien erfolgreich erstellt!');
+        fetchProject(); // Refresh project data including categories
+        setTimeout(() => setSaveMessage(''), 3000);
+      } else {
+        const errorData = await response.json();
+        setSaveError(errorData.error || 'Fehler beim Erstellen der Kategorien');
+      }
+    } catch (error) {
+      setSaveError('Verbindungsfehler. Bitte versuchen Sie es erneut.');
+    }
+  };
+
   const exportLogsToCsv = () => {
     if (!consentLogs || consentLogs.length === 0) {
       alert('Keine Logs zum Exportieren vorhanden.');
@@ -1056,8 +1079,28 @@ function acceptAllCookies() {
                 </span>
               </div>
               
-              <div className="space-y-4">
-                {categories.map((category) => (
+              {categories.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                  <div className="mb-4">
+                    <Cookie className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">
+                      Keine Cookie-Kategorien vorhanden
+                    </h4>
+                    <p className="text-sm text-gray-600 mb-6">
+                      Erstellen Sie zunächst Cookie-Kategorien, um Cookie-Services verwalten zu können.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleCreateDefaultCategories}
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  >
+                    <Cookie className="w-4 h-4 mr-2" />
+                    Standard-Kategorien erstellen
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {categories.map((category) => (
                   <div
                     key={category.id}
                     className="border border-gray-200 rounded-lg p-4"
@@ -1163,7 +1206,8 @@ function acceptAllCookies() {
                     )}
                   </div>
                 ))}
-              </div>
+                </div>
+              )}
             </div>
           )}
 

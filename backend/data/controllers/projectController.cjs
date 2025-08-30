@@ -52,7 +52,25 @@ const createProject = catchAsync(async (req, res) => {
     about_cookies_text, custom_html, custom_css, custom_js
   ]);
 
-  res.status(201).json({ id: result.insertId, success: true });
+  const projectId = result.insertId;
+
+  // Create default cookie categories for new project
+  const defaultCategories = [
+    { name: 'Notwendige Cookies', description: 'Diese Cookies sind für die Grundfunktionen der Website erforderlich und können nicht deaktiviert werden.', required: true, sort_order: 1 },
+    { name: 'Präferenzen Cookies', description: 'Diese Cookies ermöglichen es der Website, sich an Ihre Einstellungen zu erinnern.', required: false, sort_order: 2 },
+    { name: 'Statistik Cookies', description: 'Diese Cookies helfen uns zu verstehen, wie Besucher mit der Website interagieren.', required: false, sort_order: 3 },
+    { name: 'Marketing Cookies', description: 'Diese Cookies werden verwendet, um Ihnen relevante Werbung zu zeigen.', required: false, sort_order: 4 }
+  ];
+
+  // Insert default categories
+  for (const category of defaultCategories) {
+    await pool.execute(`
+      INSERT INTO cookie_categories (project_id, name, description, required, sort_order)
+      VALUES (?, ?, ?, ?, ?)
+    `, [projectId, category.name, category.description, category.required, category.sort_order]);
+  }
+
+  res.status(201).json({ id: projectId, success: true });
 });
 
 const getProjectById = catchAsync(async (req, res) => {
@@ -83,6 +101,40 @@ const updateProject = catchAsync(async (req, res) => {
 
   await pool.execute(`UPDATE projects SET ${setClause} WHERE id = ?`, [...values, id]);
   res.json({ success: true });
+});
+
+const createDefaultCategories = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  
+  // Check if project exists
+  const [projects] = await pool.execute('SELECT * FROM projects WHERE id = ?', [id]);
+  if (projects.length === 0) {
+    return res.status(404).json({ error: 'Project not found' });
+  }
+
+  // Check if categories already exist
+  const [existingCategories] = await pool.execute('SELECT COUNT(*) as count FROM cookie_categories WHERE project_id = ?', [id]);
+  if (existingCategories[0].count > 0) {
+    return res.status(400).json({ error: 'Project already has categories' });
+  }
+
+  // Create default categories
+  const defaultCategories = [
+    { name: 'Notwendige Cookies', description: 'Diese Cookies sind für die Grundfunktionen der Website erforderlich und können nicht deaktiviert werden.', required: true, sort_order: 1 },
+    { name: 'Präferenzen Cookies', description: 'Diese Cookies ermöglichen es der Website, sich an Ihre Einstellungen zu erinnern.', required: false, sort_order: 2 },
+    { name: 'Statistik Cookies', description: 'Diese Cookies helfen uns zu verstehen, wie Besucher mit der Website interagieren.', required: false, sort_order: 3 },
+    { name: 'Marketing Cookies', description: 'Diese Cookies werden verwendet, um Ihnen relevante Werbung zu zeigen.', required: false, sort_order: 4 }
+  ];
+
+  // Insert default categories
+  for (const category of defaultCategories) {
+    await pool.execute(`
+      INSERT INTO cookie_categories (project_id, name, description, required, sort_order)
+      VALUES (?, ?, ?, ?, ?)
+    `, [id, category.name, category.description, category.required, category.sort_order]);
+  }
+
+  res.json({ success: true, message: 'Default categories created successfully' });
 });
 
 const getProjectConsentLogs = catchAsync(async (req, res) => {
@@ -123,5 +175,6 @@ module.exports = {
   getProjectById,
   updateProject,
   getProjectConsentLogs,
-  deleteProject
+  deleteProject,
+  createDefaultCategories
 };
