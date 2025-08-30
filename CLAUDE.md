@@ -128,6 +128,70 @@ Das System generiert ein JavaScript-Snippet für die Integration:
 
 Das `load.js`-Skript befindet sich in `/project/public/load.js` und wird über Nginx ausgeliefert.
 
+### Globale JavaScript-Funktionen (load.js)
+Das Banner-System stellt folgende globale Funktionen zur Verfügung:
+- `window.dsgvoBanner.open()` - Banner erneut öffnen
+- `window.dsgvoBanner.showDetails()` - DSGVO-Details-Modal anzeigen
+- `window.dsgvoBanner.acceptAllCookies()` - Alle Cookies akzeptieren
+- `window.dsgvoBanner.rejectAllCookies()` - Alle Cookies ablehnen
+- `window.dsgvoBanner.withdrawConsent()` - Einwilligung widerrufen
+
+## DSGVO-Compliance Status
+
+### ✅ Implementierte Features (DSGVO-Sofortmaßnahmen)
+
+**Rechtliche Compliance (Art. 7, 13, 14, 21, 22 DSGVO)**
+- **Widerruf der Einwilligung** (Art. 7 Abs. 3 DSGVO) - Vollständig implementiert
+  - `withdrawConsent()` Funktion mit Bestätigungsdialog
+  - Komplette Cookie-Löschung und LocalStorage-Reset
+  - Automatisches Banner-Reload nach Widerruf
+- **"Alle ablehnen" Option** - Gleichwertige Darstellung zu "Alle akzeptieren"
+- **Rechtsgrundlagen-Information** - Automatische Erkennung basierend auf Service-Provider
+- **Drittland-Transfer Hinweise** - US-Unternehmen (Google, Meta, etc.) mit Warnhinweisen
+- **Verantwortlicher-Information** - Data Controller Details werden angezeigt
+- **Betroffenenrechte** - Vollständige DSGVO-Rechte-Auflistung im Details-Modal
+
+**Cookie-Details-Modal mit DSGVO-Compliance**
+- **Granulare Einwilligung** mit Toggle-Switches pro Kategorie
+- **Klappbare Service-Details** für bessere Übersichtlichkeit
+- **Rechtliche Informationen** pro Service (Rechtsgrundlage, Empfänger, Speicherdauer)
+- **Automatische Drittland-Erkennung** mit entsprechenden Warnhinweisen
+- **DSGVO-Rechte-Sektion** mit vollständiger Information
+
+**Consent-Management**
+- **Dynamische Cookie-Speicherdauer** basierend auf Projekt-Konfiguration
+- **Vollständige Consent-Historie** mit Zeitstempeln in LocalStorage
+- **Service-basiertes Script-Loading** nur bei erteilter Einwilligung
+- **LocalStorage-Details** für granulare Einwilligungsverfolgung
+
+### 🔄 Technische Implementierung
+
+**Core-Datei: `/project/public/load.js`**
+- **showDetailsModal()**: Erweiterte DSGVO-Details mit Rechtsgrundlagen-Erkennung
+- **Legal Basis Detection**: Automatische Zuordnung basierend auf Provider-Namen
+- **Third-Country Warnings**: USA-Transfer-Hinweise für internationale Dienste
+- **Withdrawal Mechanism**: Vollständiger Consent-Widerruf mit Cookie-Löschung
+- **Data Controller Display**: Projekt-spezifische Verantwortlicher-Information
+
+**Test-Integration: `/test-website.html`**
+- DSGVO-Test-Buttons für alle Funktionen
+- Compliance-Feature-Checklist visuell dargestellt
+- Erweiterte Test-Szenarien für Widerruf und Ablehnung
+
+### 🎯 Nächste Entwicklungsphase (Vorbereitet)
+
+**Backend-Erweiterungen (geplant)**
+- Erweiterte Datenbank-Schema für GDPR-Metadaten
+- Projekt-spezifische Data Controller Konfiguration
+- Service-spezifische Rechtsgrundlagen-Verwaltung
+- Erweiterte Consent-Logs mit GDPR-Compliance-Metriken
+
+**Frontend-Admin-Panel (geplant)**
+- GDPR-Konfigurationsseite pro Projekt
+- Data Controller Verwaltung
+- Rechtsgrundlagen-Editor für Services
+- Compliance-Dashboard mit GDPR-Metriken
+
 ## Code-Konventionen
 
 ### Backend

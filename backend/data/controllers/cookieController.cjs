@@ -22,10 +22,24 @@ const createCookieService = catchAsync(async (req, res) => {
   }
   // A real authorization would also check if req.user.id has rights to this project.
 
+  // Handle undefined values by setting them to null
+  const safeValues = [
+    projectId,
+    category_id,
+    name,
+    description || null,
+    provider || null,
+    cookie_names || null,
+    script_code || null,
+    privacy_policy_url || null,
+    retention_period || null,
+    purpose || null
+  ];
+
   const [result] = await pool.execute(
     `INSERT INTO cookie_services (project_id, category_id, name, description, provider, cookie_names, script_code, privacy_policy_url, retention_period, purpose)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [projectId, category_id, name, description, provider, cookie_names, script_code, privacy_policy_url, retention_period, purpose]
+    safeValues
   );
 
   const insertId = result.insertId;

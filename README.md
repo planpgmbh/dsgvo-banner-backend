@@ -1,16 +1,39 @@
 # DSGVO Banner Management System
 
-Dieses Repository enthält ein vollständiges DSGVO-konformes Cookie-Banner-System, bestehend aus einem Admin-Panel zur Verwaltung und einem Backend zur Auslieferung der Banner-Konfigurationen und zur Speicherung von Einwilligungen.
+Dieses Repository enthält ein vollständiges **DSGVO-konformes Cookie-Banner-System** mit erweiterten rechtlichen Compliance-Features, bestehend aus einem Admin-Panel zur Verwaltung und einem Backend zur Auslieferung der Banner-Konfigurationen und zur Speicherung von Einwilligungen.
 
-## 🚀 Features
+## 🚀 Core Features
 
-- **Zentrales Admin-Panel** zur Verwaltung mehrerer unabhängiger Projekte/Websites.
-- **Vollständig konfigurierbares Cookie-Banner**: Passen Sie Texte, Buttons, Kategorien und einzelne Dienste an.
-- **Einfache Integration**: Ein einziges JavaScript-Snippet (`load.js`) genügt zur Einbindung auf jeder Website.
-- **DSGVO-konforme Speicherung**: Einwilligungen werden mit einem pseudonymisierten IP-Hash und Ablaufdatum gespeichert.
-- **Consent-Logs**: Detaillierte Protokolle über erteilte Einwilligungen mit Export-Funktion.
-- **Mehrsprachige Unterstützung** (Standard: Deutsch).
-- **Responsive Design** für Desktops, Tablets und Smartphones.
+- **Zentrales Admin-Panel** zur Verwaltung mehrerer unabhängiger Projekte/Websites
+- **Vollständig konfigurierbares Cookie-Banner**: Passen Sie Texte, Buttons, Kategorien und einzelne Dienste an
+- **Einfache Integration**: Ein einziges JavaScript-Snippet (`load.js`) genügt zur Einbindung auf jeder Website
+- **DSGVO-konforme Speicherung**: Einwilligungen werden mit einem pseudonymisierten IP-Hash und Ablaufdatum gespeichert
+- **Consent-Logs**: Detaillierte Protokolle über erteilte Einwilligungen mit Export-Funktion
+- **Mehrsprachige Unterstützung** (Standard: Deutsch)
+- **Responsive Design** für Desktops, Tablets und Smartphones
+
+## 🛡️ DSGVO-Compliance Features (Erweitert)
+
+### **Rechtliche Compliance (Art. 13, 14, 21, 22 DSGVO)**
+- **✅ Widerruf der Einwilligung** (Art. 7 Abs. 3 DSGVO) - Jederzeit einfach möglich
+- **✅ "Alle ablehnen" Option** - Gleichwertige Darstellung zu "Alle akzeptieren" 
+- **✅ Rechtsgrundlagen-Information** - Automatische Anzeige von Art. 6 DSGVO Grundlagen
+- **✅ Drittland-Transfer Hinweise** - Warnung bei USA-Übertragungen (Google, Meta, etc.)
+- **✅ Verantwortlicher-Information** - Data Controller Details pro Projekt
+- **✅ Betroffenenrechte** - Vollständige Auflistung der Nutzerrechte
+
+### **Cookie-Details-Modal mit vollständiger DSGVO-Compliance**
+- **Granulare Einwilligung** mit Toggle-Switches pro Kategorie
+- **Klappbare Service-Details** für bessere Übersichtlichkeit
+- **Rechtliche Informationen** pro Service (Rechtsgrundlage, Empfänger, Speicherdauer)
+- **Automatische Drittland-Erkennung** mit entsprechenden Warnhinweisen
+- **Link zur Datenschutzerklärung** für vollständige Transparenz
+
+### **Consent-Management**
+- **Dynamische Cookie-Speicherdauer** basierend auf Projekt-Konfiguration
+- **Vollständige Consent-Historie** mit Zeitstempeln
+- **Service-basiertes Script-Loading** nur bei erteilter Einwilligung
+- **LocalStorage-Details** für granulare Einwilligungsverfolgung
 
 ## 🛠️ Technologie-Stack
 

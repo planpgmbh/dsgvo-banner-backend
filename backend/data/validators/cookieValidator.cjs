@@ -12,8 +12,8 @@ const createCookieServiceValidationRules = () => {
   return [
     param('projectId').isInt({ min: 1 }).withMessage('A valid projectId in the URL is required'),
     body('name').isString().notEmpty().withMessage('Field "name" is required'),
-    body('description').isString().notEmpty().withMessage('Field "description" is required'),
-    body('provider').isString().notEmpty().withMessage('Field "provider" is required'),
+    body('description').optional().isString().withMessage('Field "description" must be a string'),
+    body('provider').optional().isString().withMessage('Field "provider" must be a string'),
     body('category_id').isInt({ min: 1 }).withMessage('A valid "category_id" is required'),
     // Optional fields
     body('cookie_names').optional().isString(),

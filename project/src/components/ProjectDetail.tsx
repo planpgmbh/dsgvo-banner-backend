@@ -56,10 +56,20 @@ interface ConsentLog {
   created_at: string;
 }
 
+interface CookieCategory {
+  id: number;
+  project_id: number;
+  name: string;
+  description: string;
+  required: boolean;
+  sort_order: number;
+}
+
 export const ProjectDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [project, setProject] = useState<Project | null>(null);
+  const [categories, setCategories] = useState<CookieCategory[]>([]);
   const [projectCookies, setProjectCookies] = useState<CookieService[]>([]);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [consentLogs, setConsentLogs] = useState<ConsentLog[]>([]);
@@ -81,37 +91,6 @@ export const ProjectDetail: React.FC = () => {
   const [showEditCookieModal, setShowEditCookieModal] = useState(false);
   const [cookieToEdit, setCookieToEdit] = useState<CookieService | null>(null);
 
-  // Fixed cookie categories
-  const fixedCategories = [
-    {
-      id: 1,
-      name: 'Notwendige Cookies',
-      description: 'Diese Cookies sind für die Grundfunktionen der Website erforderlich und können nicht deaktiviert werden.',
-      required: true,
-      sort_order: 1
-    },
-    {
-      id: 2,
-      name: 'Präferenzen Cookies',
-      description: 'Diese Cookies ermöglichen es der Website, sich an Ihre Einstellungen zu erinnern.',
-      required: false,
-      sort_order: 2
-    },
-    {
-      id: 3,
-      name: 'Statistik Cookies',
-      description: 'Diese Cookies helfen uns zu verstehen, wie Besucher mit der Website interagieren.',
-      required: false,
-      sort_order: 3
-    },
-    {
-      id: 4,
-      name: 'Marketing Cookies',
-      description: 'Diese Cookies werden verwendet, um Ihnen relevante Werbung zu zeigen.',
-      required: false,
-      sort_order: 4
-    }
-  ];
 
   useEffect(() => {
     if (id) {
@@ -157,6 +136,7 @@ export const ProjectDetail: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         setProject(data.project);
+        setCategories(data.categories || []);
       }
     } catch (error) {
       console.error('Error fetching project:', error);
@@ -516,7 +496,7 @@ export const ProjectDetail: React.FC = () => {
       if (!Array.isArray(acceptedServiceIds)) { // Old object-based format
           const oldAccepted = Object.entries(acceptedServiceIds)
             .filter(([_, accepted]) => accepted)
-            .map(([catId, _]) => fixedCategories.find(c => c.id === parseInt(catId))?.name)
+            .map(([catId, _]) => categories.find(c => c.id === parseInt(catId))?.name)
             .filter(Boolean);
           
           if (oldAccepted.length === 1 && oldAccepted[0] === 'Notwendige Cookies') return 'Nur Notwendige';
@@ -1072,12 +1052,12 @@ function acceptAllCookies() {
                   Cookie-Verwaltung
                 </h3>
                 <span className="text-sm text-gray-600">
-                  {fixedCategories.length} Standard-Kategorien
+                  {categories.length} Kategorien
                 </span>
               </div>
               
               <div className="space-y-4">
-                {fixedCategories.map((category) => (
+                {categories.map((category) => (
                   <div
                     key={category.id}
                     className="border border-gray-200 rounded-lg p-4"
@@ -1382,7 +1362,7 @@ function acceptAllCookies() {
         <CreateCookieModal
           projectId={id!}
           categoryId={selectedCategoryId}
-          categoryName={fixedCategories.find(c => c.id === selectedCategoryId)?.name || ''}
+          categoryName={categories.find(c => c.id === selectedCategoryId)?.name || ''}
           onClose={() => {
             setShowCreateCookieModal(false);
             setSelectedCategoryId(null);
@@ -1395,7 +1375,7 @@ function acceptAllCookies() {
         <CreateCookieModal
           projectId={id!}
           categoryId={cookieToEdit.category_id}
-          categoryName={fixedCategories.find(c => c.id === cookieToEdit.category_id)?.name || ''}
+          categoryName={categories.find(c => c.id === cookieToEdit.category_id)?.name || ''}
           initialCookieData={cookieToEdit}
           onClose={() => {
             setShowEditCookieModal(false);
@@ -1418,7 +1398,7 @@ function acceptAllCookies() {
               project={{
                 ...editableProject,
                 cookies: projectCookies,
-                categories: fixedCategories,
+                categories: categories,
               }}
             />
           </div>
