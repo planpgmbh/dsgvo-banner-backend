@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Globe, Plus, Settings, Eye, Calendar } from 'lucide-react';
+import { Globe, Plus, Settings, Eye, Calendar, X } from 'lucide-react';
 import { CreateProjectModal } from './CreateProjectModal';
+import { BannerPreview } from './BannerPreview';
 
 interface Project {
   id: number;
@@ -17,6 +18,8 @@ export const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [previewProject, setPreviewProject] = useState<Project | null>(null);
+  const [previewProjectDetails, setPreviewProjectDetails] = useState(null);
 
   useEffect(() => {
     fetchProjects();
@@ -45,6 +48,32 @@ export const Dashboard: React.FC = () => {
   const handleProjectCreated = () => {
     setShowCreateModal(false);
     fetchProjects();
+  };
+
+  const handlePreviewClick = async (project: Project) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/projects/${project.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Backend API liefert: { project: {...}, categories: [...], services: [...] }
+        // BannerPreview erwartet: { custom_html, custom_css, categories, cookies }
+        const projectDetails = {
+          ...data.project,           // custom_html, custom_css, etc.
+          categories: data.categories,
+          cookies: data.services     // "services" → "cookies"
+        };
+        setPreviewProjectDetails(projectDetails);
+        setPreviewProject(project);
+      }
+    } catch (error) {
+      console.error('Error fetching project details for preview:', error);
+    }
   };
 
   return (
@@ -146,7 +175,7 @@ export const Dashboard: React.FC = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          // TODO: Implement preview functionality
+                          handlePreviewClick(project);
                         }}
                         className="inline-flex items-center px-3 py-1 text-xs font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200"
                       >
@@ -167,6 +196,36 @@ export const Dashboard: React.FC = () => {
           onClose={() => setShowCreateModal(false)}
           onProjectCreated={handleProjectCreated}
         />
+      )}
+
+      {previewProject && previewProjectDetails && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+          <div className="relative bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">
+                  Banner-Vorschau: {previewProject.name}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {previewProject.domain}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setPreviewProject(null);
+                  setPreviewProjectDetails(null);
+                }}
+                className="rounded-md bg-white text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <span className="sr-only">Schließen</span>
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <div className="p-6">
+              <BannerPreview project={previewProjectDetails} />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

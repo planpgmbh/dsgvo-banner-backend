@@ -65,9 +65,9 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       </div>
 
       <div class="uc-cta">
-        <button class="uc-btn uc-btn-primary" id="uc-allow">[#ACCEPT_ALL_TEXT#]</button>
-        <button class="uc-btn uc-btn-secondary" id="uc-necessary">[#NECESSARY_ONLY_TEXT#]</button>
-        <button class="uc-btn uc-btn-outline" id="uc-save">[#ACCEPT_SELECTION_TEXT#]</button>
+        <button class="uc-btn uc-btn-primary" data-action="acceptAll">[#ACCEPT_ALL_TEXT#]</button>
+        <button class="uc-btn uc-btn-secondary" data-action="necessaryOnly">[#NECESSARY_ONLY_TEXT#]</button>
+        <button class="uc-btn uc-btn-outline" data-action="acceptSelection">[#ACCEPT_SELECTION_TEXT#]</button>
       </div>
     </section>
   </div>`,

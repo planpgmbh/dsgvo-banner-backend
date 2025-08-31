@@ -40,10 +40,25 @@ interface CookieService {
 
 interface AnalyticsData {
   totalConsents: number;
-  weeklyConsents: number;
-  acceptanceRate: number;
-  categoryBreakdown: {
-    [key: string]: number;
+  consentTypes: Array<{
+    type: 'accept_all' | 'selective';
+    count: number;
+  }>;
+  categoryStats: Array<{
+    category_name: string;
+    accepted_count: number;
+    total_consents: number;
+    acceptance_rate: number;
+  }>;
+  dailyTrends: Array<{
+    date: string;
+    total_consents: number;
+    accept_all_count: number;
+    selective_count: number;
+  }>;
+  summary: {
+    acceptAllRate: number;
+    selectiveRate: number;
   };
 }
 
@@ -177,20 +192,16 @@ export const ProjectDetail: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setAnalyticsData({
-          totalConsents: data.totalConsents || 0,
-          weeklyConsents: 0, // Will be calculated from consentLogs
-          acceptanceRate: 0, // Will be calculated from consentLogs
-          categoryBreakdown: data.categoryBreakdown || {}
-        });
+        setAnalyticsData(data);
       } else {
         console.error('Failed to fetch analytics data:', response.status);
         // Fallback data on error
         setAnalyticsData({
           totalConsents: 0,
-          weeklyConsents: 0,
-          acceptanceRate: 0,
-          categoryBreakdown: {}
+          consentTypes: [],
+          categoryStats: [],
+          dailyTrends: [],
+          summary: { acceptAllRate: 0, selectiveRate: 0 }
         });
       }
     } catch (error) {
@@ -198,55 +209,17 @@ export const ProjectDetail: React.FC = () => {
       // Fallback data on error
       setAnalyticsData({
         totalConsents: 0,
-        weeklyConsents: 0,
-        acceptanceRate: 0,
-        categoryBreakdown: {}
+        consentTypes: [],
+        categoryStats: [],
+        dailyTrends: [],
+        summary: { acceptAllRate: 0, selectiveRate: 0 }
       });
     } finally {
       setAnalyticsLoading(false);
     }
   };
 
-  // Calculate analytics from consent logs
-  useEffect(() => {
-    if (consentLogs.length > 0 && analyticsData) {
-      const now = new Date();
-      const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      
-      // Calculate weekly consents (last 7 days)
-      const weeklyConsents = consentLogs.filter(log => {
-        const logDate = new Date(log.created_at);
-        return logDate >= oneWeekAgo;
-      }).length;
-      
-      // Calculate acceptance rate (percentage of consents that include more than just necessary cookies)
-      let acceptedOptionalCount = 0;
-      
-      consentLogs.forEach(log => {
-        try {
-          const consentsData = JSON.parse(log.consents);
-          // Check if any optional categories (2, 3, 4) are accepted
-          const hasOptionalConsents = consentsData['2'] || consentsData['3'] || consentsData['4'];
-          if (hasOptionalConsents) {
-            acceptedOptionalCount++;
-          }
-        } catch (e) {
-          console.error('Error parsing consents for analytics:', e);
-        }
-      });
-      
-      const acceptanceRate = consentLogs.length > 0 
-        ? Math.round((acceptedOptionalCount / consentLogs.length) * 100)
-        : 0;
-      
-      // Update analytics data with calculated values
-      setAnalyticsData(prev => prev ? {
-        ...prev,
-        weeklyConsents,
-        acceptanceRate
-      } : null);
-    }
-  }, [consentLogs, analyticsData?.totalConsents]);
+  // Analytics data is now fully provided by backend API
 
   const fetchConsentLogs = async () => {
     if (!id) return;
@@ -1290,7 +1263,7 @@ function acceptAllCookies() {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div className="bg-blue-50 p-4 rounded-lg">
                       <div className="text-2xl font-bold text-blue-600">
                         {analyticsData?.totalConsents || 0}
@@ -1301,24 +1274,64 @@ function acceptAllCookies() {
                     </div>
                     <div className="bg-green-50 p-4 rounded-lg">
                       <div className="text-2xl font-bold text-green-600">
-                        {analyticsData?.weeklyConsents || 0}
+                        {analyticsData?.summary?.acceptAllRate || 0}
                       </div>
                       <div className="text-sm text-green-600">
-                        Diese Woche
+                        "Alle akzeptieren"
+                      </div>
+                    </div>
+                    <div className="bg-orange-50 p-4 rounded-lg">
+                      <div className="text-2xl font-bold text-orange-600">
+                        {analyticsData?.summary?.selectiveRate || 0}
+                      </div>
+                      <div className="text-sm text-orange-600">
+                        Individuelle Auswahl
                       </div>
                     </div>
                     <div className="bg-purple-50 p-4 rounded-lg">
                       <div className="text-2xl font-bold text-purple-600">
-                        {analyticsData?.acceptanceRate || 0}%
+                        {analyticsData?.dailyTrends?.length || 0}
                       </div>
                       <div className="text-sm text-purple-600">
-                        Akzeptanzrate
+                        Aktive Tage (30d)
                       </div>
                     </div>
                   </div>
                 )}
               </div>
               
+              {/* Kategorie-Statistiken */}
+              {analyticsData?.categoryStats && analyticsData.categoryStats.length > 0 && (
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-4">
+                    Cookie-Kategorien Akzeptanzraten
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {analyticsData.categoryStats.map((category) => (
+                      <div key={category.category_name} className="bg-gray-50 p-4 rounded-lg">
+                        <div className="flex justify-between items-center mb-2">
+                          <h5 className="font-medium text-gray-900 capitalize">
+                            {category.category_name}
+                          </h5>
+                          <span className="text-sm font-bold text-blue-600">
+                            {category.acceptance_rate}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full" 
+                            style={{ width: `${category.acceptance_rate}%` }}
+                          ></div>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {category.accepted_count} von {category.total_consents} Einwilligungen
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="font-medium text-gray-900">

@@ -80,7 +80,7 @@ export const BannerPreview: React.FC<BannerPreviewProps> = ({ project }) => {
     <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
       <div className="p-6">
         <div className="max-w-2xl mx-auto">
-          {/* Custom HTML Preview or Default Banner */}
+          {/* Banner Preview - Immer Custom HTML/CSS verwenden */}
           {project.custom_html ? (
             <div className="relative">
               {/* Custom CSS */}
@@ -108,6 +108,10 @@ export const BannerPreview: React.FC<BannerPreviewProps> = ({ project }) => {
           ) : (
             /* Default Banner Preview */
             <div className="dsgvo-modal relative">
+              {/* Custom CSS auch für Default-Banner */}
+              {project.custom_css && (
+                <style dangerouslySetInnerHTML={{ __html: project.custom_css }} />
+              )}
               <div className="dsgvo-tabs">
                 <button
                   className={`dsgvo-tab ${activeTab === 'consent' ? 'active' : ''}`}
