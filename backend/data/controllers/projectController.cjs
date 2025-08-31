@@ -40,37 +40,57 @@ const createProject = catchAsync(async (req, res) => {
     custom_js = ''         // Default to empty string
   } = req.body;
 
-  const [result] = await pool.execute(`
-    INSERT INTO projects (
+  // Get connection for transaction
+  const connection = await pool.getConnection();
+  
+  try {
+    // Start transaction
+    await connection.beginTransaction();
+
+    // Insert project
+    const [result] = await connection.execute(`
+      INSERT INTO projects (
+        name, domain, banner_title, banner_text, accept_all_text,
+        accept_selection_text, necessary_only_text, language, expiry_months,
+        about_cookies_text, custom_html, custom_css, custom_js
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
       name, domain, banner_title, banner_text, accept_all_text,
       accept_selection_text, necessary_only_text, language, expiry_months,
       about_cookies_text, custom_html, custom_css, custom_js
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `, [
-    name, domain, banner_title, banner_text, accept_all_text,
-    accept_selection_text, necessary_only_text, language, expiry_months,
-    about_cookies_text, custom_html, custom_css, custom_js
-  ]);
+    ]);
 
-  const projectId = result.insertId;
+    const projectId = result.insertId;
 
-  // Create default cookie categories for new project
-  const defaultCategories = [
-    { name: 'Notwendige Cookies', description: 'Diese Cookies sind für die Grundfunktionen der Website erforderlich und können nicht deaktiviert werden.', required: true, sort_order: 1 },
-    { name: 'Präferenzen Cookies', description: 'Diese Cookies ermöglichen es der Website, sich an Ihre Einstellungen zu erinnern.', required: false, sort_order: 2 },
-    { name: 'Statistik Cookies', description: 'Diese Cookies helfen uns zu verstehen, wie Besucher mit der Website interagieren.', required: false, sort_order: 3 },
-    { name: 'Marketing Cookies', description: 'Diese Cookies werden verwendet, um Ihnen relevante Werbung zu zeigen.', required: false, sort_order: 4 }
-  ];
+    // Create default cookie categories for new project
+    const defaultCategories = [
+      { name: 'Notwendige Cookies', description: 'Diese Cookies sind für die Grundfunktionen der Website erforderlich und können nicht deaktiviert werden.', required: true, sort_order: 1 },
+      { name: 'Präferenzen Cookies', description: 'Diese Cookies ermöglichen es der Website, sich an Ihre Einstellungen zu erinnern.', required: false, sort_order: 2 },
+      { name: 'Statistik Cookies', description: 'Diese Cookies helfen uns zu verstehen, wie Besucher mit der Website interagieren.', required: false, sort_order: 3 },
+      { name: 'Marketing Cookies', description: 'Diese Cookies werden verwendet, um Ihnen relevante Werbung zu zeigen.', required: false, sort_order: 4 }
+    ];
 
-  // Insert default categories
-  for (const category of defaultCategories) {
-    await pool.execute(`
-      INSERT INTO cookie_categories (project_id, name, description, required, sort_order)
-      VALUES (?, ?, ?, ?, ?)
-    `, [projectId, category.name, category.description, category.required, category.sort_order]);
+    // Insert default categories
+    for (const category of defaultCategories) {
+      await connection.execute(`
+        INSERT INTO cookie_categories (project_id, name, description, required, sort_order)
+        VALUES (?, ?, ?, ?, ?)
+      `, [projectId, category.name, category.description, category.required, category.sort_order]);
+    }
+
+    // Commit transaction
+    await connection.commit();
+
+    res.status(201).json({ id: projectId, success: true });
+
+  } catch (error) {
+    // Rollback transaction on error
+    await connection.rollback();
+    throw error; // Re-throw to be handled by catchAsync
+  } finally {
+    // Release connection
+    connection.release();
   }
-
-  res.status(201).json({ id: projectId, success: true });
 });
 
 const getProjectById = catchAsync(async (req, res) => {
