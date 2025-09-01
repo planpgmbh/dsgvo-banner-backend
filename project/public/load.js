@@ -410,9 +410,39 @@
     const modal = document.createElement('div');
     modal.id = 'dsgvo-details-modal';
     
+    // Critical inline styles for modal overlay (protection against external CSS)
+    modal.style.cssText = `
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      background: rgba(0, 0, 0, 0.7) !important;
+      z-index: 10000 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 20px !important;
+      box-sizing: border-box !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    `;
+    
     // Create modal content
     const modalContent = document.createElement('div');
     modalContent.className = 'uc-modal-content';
+    
+    // Critical inline styles for modal content (protection against external CSS)
+    modalContent.style.cssText = `
+      background: #ffffff !important;
+      border-radius: 12px !important;
+      max-width: 900px !important;
+      width: 100% !important;
+      max-height: 90vh !important;
+      overflow-y: auto !important;
+      position: relative !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    `;
     
     // Generate content HTML
     let contentHTML = `
@@ -681,6 +711,18 @@
 
     const bannerContainer = document.createElement('div');
     bannerContainer.id = BANNER_CONTAINER_ID;
+    
+    // Critical inline styles for banner container (protection against external CSS)
+    bannerContainer.style.cssText = `
+      all: initial !important;
+      position: fixed !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      z-index: 9999 !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+      box-sizing: border-box !important;
+    `;
     
     const processedHtml = replacePlaceholders(config.banner_html, config.project);
 

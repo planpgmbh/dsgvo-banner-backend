@@ -52,8 +52,52 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
    DSGVO COOKIE BANNER - CSS KONFIGURATION
    ========================================== */
 
+/* ============================================================================
+   CSS-RESET FÜR BANNER-ISOLATION - Schutz vor externen Website-Styles
+   ============================================================================ */
+#dsgvo-banner-container,
+#dsgvo-banner-container *,
+#dsgvo-details-modal,
+#dsgvo-details-modal * {
+  /* Reset kritischer Properties gegen externe Styles */
+  box-sizing: border-box !important;
+  line-height: initial !important;
+}
+
+/* Spezifische Resets für häufige Konflikte */
+#dsgvo-banner-container h1,
+#dsgvo-banner-container h2, 
+#dsgvo-banner-container h3,
+#dsgvo-banner-container h4,
+#dsgvo-banner-container p,
+#dsgvo-banner-container div,
+#dsgvo-banner-container button,
+#dsgvo-banner-container input,
+#dsgvo-banner-container label,
+#dsgvo-details-modal h1,
+#dsgvo-details-modal h2,
+#dsgvo-details-modal h3,
+#dsgvo-details-modal h4,
+#dsgvo-details-modal p,
+#dsgvo-details-modal div,
+#dsgvo-details-modal button,
+#dsgvo-details-modal input,
+#dsgvo-details-modal label {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  color: inherit !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  text-decoration: none !important;
+  text-align: inherit !important;
+}
+
 /* CSS VARIABLEN - Hier können Farben und Größen zentral angepasst werden */
-:root {
+#dsgvo-banner-container {
   /* FARBEN */
   --uc-primary: #0a49ff;        /* Haupt-Button-Farbe (Alle akzeptieren) */
   --uc-text: #0b0b0c;          /* Haupttext-Farbe */
@@ -96,47 +140,50 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 }
 
 /* BANNER-CONTAINER - Positionierung am unteren Bildschirmrand */
-.uc-banner-wrap {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 9999;
-  display: flex;
+#dsgvo-banner-container .uc-banner-wrap {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 9999 !important;
+  display: flex !important;
   justify-content: center;
   padding: 24px;
   font-family: var(--uc-font-family); /* Banner verwendet eigene Schriftart */
+  justify-content: center !important;
+  padding: 24px !important;
+  font-family: var(--uc-font-family) !important; /* Banner verwendet eigene Schriftart */
 }
 
 /* HAUPT-BANNER - Layout und Styling */
-.uc-banner {
-  width: 100%;
-  max-width: var(--uc-max-width);
-  background: var(--uc-background);
-  border-radius: var(--uc-border-radius);
-  padding: 24px;
-  display: grid;
-  gap: 18px;
-  grid-template-columns: 1fr auto; /* Text links, Buttons rechts */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+#dsgvo-banner-container .uc-banner {
+  width: 100% !important;
+  max-width: var(--uc-max-width) !important;
+  background: var(--uc-background) !important;
+  border-radius: var(--uc-border-radius) !important;
+  padding: 24px !important;
+  display: grid !important;
+  gap: 18px !important;
+  grid-template-columns: 1fr auto !important; /* Text links, Buttons rechts */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* TITEL-BEREICH */
-.uc-headline {
-  margin: 0 0 8px 0;
-  font-weight: var(--uc-font-weight-title);
-  font-size: var(--uc-font-size-title);
-  color: var(--uc-text);
-  font-family: var(--uc-font-family);
+#dsgvo-banner-container .uc-headline {
+  margin: 0 0 8px 0 !important;
+  font-weight: var(--uc-font-weight-title) !important;
+  font-size: var(--uc-font-size-title) !important;
+  color: var(--uc-text) !important;
+  font-family: var(--uc-font-family) !important;
 }
 
 /* TEXT-BEREICH */
-.uc-desc {
-  margin: 0;
-  color: var(--uc-text);
-  font-size: var(--uc-font-size-text);
-  line-height: 1.5;
-  font-family: var(--uc-font-family);
+#dsgvo-banner-container .uc-desc {
+  margin: 0 !important;
+  color: var(--uc-text) !important;
+  font-size: var(--uc-font-size-text) !important;
+  line-height: 1.5 !important;
+  font-family: var(--uc-font-family) !important;
 }
 
 /* DETAILS-LINK ("Details zeigen") */
@@ -322,33 +369,33 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 }
 
 /* MODAL-CONTAINER - Zentraler Modal-Box */
-.uc-modal-content {
-  background: var(--uc-modal-background);
-  border-radius: var(--uc-modal-border-radius);
-  max-width: var(--uc-modal-max-width);
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  position: relative;
-  box-shadow: var(--uc-modal-shadow);
-  font-family: var(--uc-font-family); /* Schriftart explizit setzen */
+#dsgvo-details-modal .uc-modal-content {
+  background: var(--uc-modal-background) !important;
+  border-radius: var(--uc-modal-border-radius) !important;
+  max-width: var(--uc-modal-max-width) !important;
+  width: 100% !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  position: relative !important;
+  box-shadow: var(--uc-modal-shadow) !important;
+  font-family: var(--uc-font-family) !important; /* Schriftart explizit setzen */
 }
 
 /* MODAL-HEADER - Titel und Schließen-Button */
-.uc-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-  padding: var(--uc-modal-padding) var(--uc-modal-padding) 0;
+#dsgvo-details-modal .uc-modal-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 25px !important;
+  padding: var(--uc-modal-padding) var(--uc-modal-padding) 0 !important;
 }
 
-.uc-modal-title {
-  margin: 0;
-  font-size: var(--uc-modal-title-size);
-  color: var(--uc-text);
-  font-weight: var(--uc-font-weight-title);
-  font-family: var(--uc-font-family);
+#dsgvo-details-modal .uc-modal-title {
+  margin: 0 !important;
+  font-size: var(--uc-modal-title-size) !important;
+  color: var(--uc-text) !important;
+  font-weight: var(--uc-font-weight-title) !important;
+  font-family: var(--uc-font-family) !important;
 }
 
 .uc-modal-close {
@@ -472,24 +519,24 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 }
 
 /* KATEGORIE-HEADER - Klickbarer Bereich */
-.uc-category-header {
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  padding: 25px;
-  margin: -25px;
-  border-radius: 6px;
+#dsgvo-details-modal .uc-category-header {
+  cursor: pointer !important;
+  transition: background-color 0.2s ease !important;
+  padding: 25px !important;
+  margin: -25px !important;
+  border-radius: 6px !important;
 }
 
-.uc-category-header:hover {
-  background-color: rgba(0, 102, 204, 0.05);
+#dsgvo-details-modal .uc-category-header:hover {
+  background-color: rgba(0, 102, 204, 0.05) !important;
 }
 
 /* Pfeil-Symbol für Kategorie-Aufklappen */
-.uc-toggle-arrow {
-  font-size: 16px;
-  margin-right: 8px;
-  transition: transform 0.2s ease;
-  display: inline-block;
+#dsgvo-details-modal .uc-toggle-arrow {
+  font-size: 16px !important;
+  margin-right: 8px !important;
+  transition: transform 0.2s ease !important;
+  display: inline-block !important;
   color: var(--uc-primary);
   font-weight: bold;
 }
