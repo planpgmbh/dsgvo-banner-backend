@@ -24,7 +24,13 @@ services:
     restart: unless-stopped
     ports:
       - "5173:80"
+    volumes:
+      # Nginx-Konfiguration mit API-Proxy automatisch mounten
+      - ./nginx-dev.conf:/etc/nginx/conf.d/default.conf:ro
+      # Test-Dateien automatisch verfügbar machen
+      - ./einfacher-banner-test.html:/usr/share/nginx/html/einfacher-banner-test.html:ro
     networks:
+      - db_dsgvobanner_dev
       - default
 
   db_dsgvobanner_dev:

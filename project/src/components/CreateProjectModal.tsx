@@ -14,13 +14,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     name: '',
     domain: '',
     banner_title: 'Diese Webseite verwendet Cookies',
-    banner_text: 'Wir verwenden Cookies, um Inhalte und Anzeigen zu personalisieren, Funktionen für soziale Medien anbieten zu können und die Zugriffe auf unsere Website zu analysieren. Außerdem geben wir Informationen zu Ihrer Verwendung unserer Website an unsere Partner für soziale Medien, Werbung und Analysen weiter. <a class="uc-link" href="#" id="uc-details">Details zeigen</a>',
+    banner_text: 'Wir verwenden Cookies, um Inhalte und Anzeigen zu personalisieren, Funktionen für soziale Medien anbieten zu können und die Zugriffe auf unsere Website zu analysieren. Außerdem geben wir Informationen zu Ihrer Verwendung unserer Website an unsere Partner für soziale Medien, Werbung und Analysen weiter. <a class="uc-link" href="#" id="cookie-details">Details zeigen</a>',
     accept_all_text: 'Cookies zulassen',
     accept_selection_text: 'Auswahl erlauben',
     necessary_only_text: 'Nur notwendige Cookies verwenden',
-    accept_all_selector: '#uc-allow',
-    accept_selection_selector: '#uc-save',
-    necessary_only_selector: '#uc-necessary',
     language: 'de',
     expiry_months: 12,
     about_cookies_text: 'Cookies sind kleine Textdateien, die von Websites verwendet werden, um die Benutzererfahrung effizienter zu gestalten. Laut Gesetz können wir Cookies auf Ihrem Gerät speichern, wenn diese für den Betrieb dieser Seite unbedingt notwendig sind. Für alle anderen Cookie-Typen benötigen wir Ihre Erlaubnis.',
@@ -40,27 +37,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               <span class="uc-switch-track"><span class="uc-switch-thumb"></span></span>
             </label>
           </div>
-          <div class="uc-group">
-            <span class="uc-label">Präferenzen</span>
-            <label class="uc-switch" title="Präferenzen">
-              <input id="uc-pref" type="checkbox" aria-label="Präferenzen">
-              <span class="uc-switch-track"><span class="uc-switch-thumb"></span></span>
-            </label>
-          </div>
-          <div class="uc-group">
-            <span class="uc-label">Statistiken</span>
-            <label class="uc-switch" title="Statistiken">
-              <input id="uc-stat" type="checkbox" aria-label="Statistiken">
-              <span class="uc-switch-track"><span class="uc-switch-thumb"></span></span>
-            </label>
-          </div>
-          <div class="uc-group">
-            <span class="uc-label">Marketing</span>
-            <label class="uc-switch" title="Marketing">
-              <input id="uc-mkt" type="checkbox" aria-label="Marketing">
-              <span class="uc-switch-track"><span class="uc-switch-thumb"></span></span>
-            </label>
-          </div>
+          <!-- Dynamic category switches will be inserted here by load.js -->
         </div>
       </div>
 
@@ -71,110 +48,650 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       </div>
     </section>
   </div>`,
-    custom_css: `:root{
-      --uc-blue:#0a49ff;
-      --uc-text:#0b0b0c;
-      --uc-muted:#6b7280;
-      --uc-bg:#ffffff;
-      --uc-switch-off:#e5e7eb;
-      --uc-switch-on:#111827;
-      --maxw:1200px;
-      --radius:12px;
-      --btnw:340px; /* gleiche Breite für beide Buttons */
-    }
+    custom_css: `/* ==========================================
+   DSGVO COOKIE BANNER - CSS KONFIGURATION
+   ========================================== */
 
-    .uc-banner-wrap{
-      position:fixed;left:0;right:0;bottom:0;z-index:9999;
-      display:flex;justify-content:center;padding:24px;
-    }
-    .uc-banner{
-      width:100%;max-width:var(--maxw);
-      background:var(--uc-bg);border-radius:16px;
-      padding:24px;display:grid;gap:18px;
-      grid-template-columns: 1fr auto;
-    }
+/* CSS VARIABLEN - Hier können Farben und Größen zentral angepasst werden */
+:root {
+  /* FARBEN */
+  --uc-primary: #0a49ff;        /* Haupt-Button-Farbe (Alle akzeptieren) */
+  --uc-text: #0b0b0c;          /* Haupttext-Farbe */
+  --uc-text-muted: #6b7280;    /* Gedämpfte Text-Farbe */
+  --uc-background: #ffffff;     /* Banner-Hintergrund */
+  --uc-switch-off: #e5e7eb;    /* Switch-Farbe (aus) */
+  --uc-switch-on: var(--uc-primary); /* Switch-Farbe (an) - blau */
+  
+  /* GRÖßEN */
+  --uc-max-width: 1200px;      /* Maximale Banner-Breite */
+  --uc-border-radius: 16px;    /* Banner-Rundung */
+  --uc-button-width: 340px;    /* Button-Breite (Desktop) */
+  
+  /* SWITCH-GRÖßEN */
+  --uc-switch-width: 48px;     /* Switch-Breite (kleiner) */
+  --uc-switch-height: 28px;    /* Switch-Höhe (kleiner) */
+  --uc-switch-thumb-size: 20px;/* Schieber-Größe (kleiner) */
+  
+  /* SCHRIFTARTEN */
+  --uc-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --uc-font-size-title: 18px;  /* Titel-Schriftgröße */
+  --uc-font-size-text: 14px;   /* Text-Schriftgröße */
+  --uc-font-size-button: 14px; /* Button-Schriftgröße */
+  --uc-font-weight-title: 700; /* Titel-Schriftgewicht */
+  --uc-font-weight-button: 600;/* Button-Schriftgewicht */
+  
+  /* DETAILS-MODAL VARIABLEN */
+  --uc-modal-overlay: rgba(0, 0, 0, 0.7);    /* Modal-Overlay-Farbe */
+  --uc-modal-background: #ffffff;            /* Modal-Hintergrund */
+  --uc-modal-border-radius: 12px;            /* Modal-Rundung */
+  --uc-modal-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); /* Modal-Schatten */
+  --uc-modal-max-width: 900px;               /* Modal-Maximale-Breite */
+  --uc-modal-padding: 30px;                  /* Modal-Innen-Abstand */
+  --uc-modal-title-size: 24px;               /* Modal-Titel-Größe */
+  --uc-modal-close-color: #666;              /* Schließen-Button-Farbe */
+  --uc-category-border: #e0e0e0;             /* Kategorie-Rahmen-Farbe */
+  --uc-category-background: #f8f9fa;         /* Kategorie-Hintergrund */
+  --uc-service-text-color: #666;             /* Service-Text-Farbe */
+  --uc-service-link-color: #0066cc;          /* Service-Link-Farbe */
+}
 
-    .uc-headline{margin:0 0 8px 0;font-weight:700;font-size:18px}
-    .uc-desc{margin:0;color:#111827}
-    .uc-link{
-      color:var(--uc-blue);font-weight:600;text-decoration:none;margin-left:.35rem;
-    }
+/* BANNER-CONTAINER - Positionierung am unteren Bildschirmrand */
+.uc-banner-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+  font-family: var(--uc-font-family); /* Banner verwendet eigene Schriftart */
+}
 
-    .uc-groups{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px}
-    .uc-group{display:flex;align-items:center;gap:10px}
-    .uc-label{font-weight:600}
+/* HAUPT-BANNER - Layout und Styling */
+.uc-banner {
+  width: 100%;
+  max-width: var(--uc-max-width);
+  background: var(--uc-background);
+  border-radius: var(--uc-border-radius);
+  padding: 24px;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 1fr auto; /* Text links, Buttons rechts */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
 
-    .uc-switch{position:relative;display:inline-block;width:56px;height:32px;flex:none}
-    .uc-switch input{appearance:none;-webkit-appearance:none;width:56px;height:32px;margin:0;outline:none}
-    .uc-switch-track{position:absolute;inset:0;border-radius:999px;background:var(--uc-switch-on);transition:background .2s ease}
-    .uc-switch input:not(:checked)+.uc-switch-track{background:var(--uc-switch-off)}
-    .uc-switch-thumb{position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:999px;background:#fff;transition:transform .2s ease;box-shadow:0 1px 2px rgba(0,0,0,.25)}
-    .uc-switch input:checked + .uc-switch-track .uc-switch-thumb{transform:translateX(24px)}
-    .uc-switch input:disabled{cursor:not-allowed;opacity:.7}
+/* TITEL-BEREICH */
+.uc-headline {
+  margin: 0 0 8px 0;
+  font-weight: var(--uc-font-weight-title);
+  font-size: var(--uc-font-size-title);
+  color: var(--uc-text);
+  font-family: var(--uc-font-family);
+}
 
-    .uc-cta{display:flex;flex-direction:column;gap:12px;align-items:flex-end;justify-content:flex-start}
-    .uc-btn{
-      appearance:none;border:0;cursor:pointer;border-radius:10px;padding:14px 22px;font-weight:800;letter-spacing:.2px;
-      width:var(--btnw); /* gleiche Breite */
-    }
-    .uc-btn-primary{background:var(--uc-blue);color:#fff}
-    .uc-btn-outline{background:#fff;color:var(--uc-text);border:2px solid var(--uc-switch-off)}
-    .uc-btn-secondary{background:var(--uc-switch-off);color:var(--uc-text);}
+/* TEXT-BEREICH */
+.uc-desc {
+  margin: 0;
+  color: var(--uc-text);
+  font-size: var(--uc-font-size-text);
+  line-height: 1.5;
+  font-family: var(--uc-font-family);
+}
 
-    @media (max-width: 960px){
-      .uc-banner{grid-template-columns:1fr}
-      .uc-cta{align-items:stretch}
-      .uc-btn{width:100%}
-    }`,
-    custom_js: `const KEY = "uc-consent";
-    const wrap = document.querySelector(".uc-banner-wrap");
-    const allowBtn = document.getElementById("uc-allow");
-    const necBtn = document.getElementById("uc-necessary");
-    const details = document.getElementById("uc-details");
-    const inputs = {
-      pref: document.getElementById("uc-pref"),
-      stat: document.getElementById("uc-stat"),
-      mkt:  document.getElementById("uc-mkt")
-    };
+/* DETAILS-LINK ("Details zeigen") */
+.uc-link {
+  color: var(--uc-primary);
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 0.35rem;
+  font-family: var(--uc-font-family);
+}
 
-    try{
-      const saved = JSON.parse(localStorage.getItem(KEY) || "null");
-      if(saved && saved.version===1){
-        wrap.style.display = "none";
-      }
-    }catch(_) {}
+/* COOKIE-SWITCHES CONTAINER */
+.uc-groups {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
 
-    allowBtn.addEventListener("click", () => {
-      saveConsent({preferences:true,statistics:true,marketing:true});
-      wrap.style.display = "none";
-    });
+/* EINZELNE SWITCH-GRUPPE */
+.uc-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
-    necBtn.addEventListener("click", () => {
-      inputs.pref.checked = false;
-      inputs.stat.checked = false;
-      inputs.mkt.checked  = false;
-      saveConsent({preferences:false,statistics:false,marketing:false});
-      wrap.style.display = "none";
-    });
+/* SWITCH-LABELS (Präferenzen, Statistiken, etc.) */
+.uc-label {
+  font-weight: 600;
+  font-size: var(--uc-font-size-text);
+  color: var(--uc-text);
+  font-family: var(--uc-font-family);
+}
 
-    details.addEventListener("click", (e)=>{
-      e.preventDefault();
-      alert("Hier würden detaillierte Cookie-Informationen erscheinen – analog zum Usercentrics-Standard.");
-    });
+/* TOGGLE-SWITCHES - Basis-Styling */
+.uc-switch {
+  position: relative;
+  display: inline-block;
+  width: var(--uc-switch-width);
+  height: var(--uc-switch-height);
+  flex: none;
+}
 
-    function saveConsent({preferences,statistics,marketing}){
-      const payload = {
-        version:1,
-        timestamp:new Date().toISOString(),
-        categories:{
-          necessary:true,
-          preferences,
-          statistics,
-          marketing
-        }
-      };
-      localStorage.setItem(KEY, JSON.stringify(payload));
-    }`
+.uc-switch input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: var(--uc-switch-width);
+  height: var(--uc-switch-height);
+  margin: 0;
+  outline: none;
+  cursor: pointer;
+}
+
+/* SWITCH-HINTERGRUND */
+.uc-switch-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--uc-switch-off);
+  transition: background 0.2s ease;
+}
+
+.uc-switch input:checked + .uc-switch-track {
+  background: var(--uc-switch-on);
+}
+
+/* SWITCH-SCHIEBER */
+.uc-switch-thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: var(--uc-switch-thumb-size);
+  height: var(--uc-switch-thumb-size);
+  border-radius: 999px;
+  background: #fff;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.uc-switch input:checked + .uc-switch-track .uc-switch-thumb {
+  transform: translateX(20px);
+}
+
+.uc-switch input:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* BUTTON-CONTAINER */
+.uc-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+/* ALLE BUTTONS - Basis-Styling */
+.uc-btn {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 14px 22px;
+  font-weight: var(--uc-font-weight-button);
+  font-size: var(--uc-font-size-button);
+  letter-spacing: 0.2px;
+  width: var(--uc-button-width);
+  font-family: var(--uc-font-family);
+  transition: all 0.2s ease;
+}
+
+/* PRIMARY BUTTON - "Alle akzeptieren" */
+.uc-btn-primary {
+  background: var(--uc-primary);
+  color: #fff;
+}
+
+.uc-btn-primary:hover {
+  background: #0837cc; /* Dunkler bei Hover */
+}
+
+/* SECONDARY BUTTON - "Nur notwendige" */
+.uc-btn-secondary {
+  background: var(--uc-switch-off);
+  color: var(--uc-text);
+}
+
+.uc-btn-secondary:hover {
+  background: #d1d5db; /* Dunkler bei Hover */
+}
+
+/* OUTLINE BUTTON - "Auswahl speichern" */
+.uc-btn-outline {
+  background: #fff;
+  color: var(--uc-text);
+  border: 2px solid var(--uc-switch-off);
+}
+
+.uc-btn-outline:hover {
+  background: #f9fafb; /* Leicht grau bei Hover */
+  border-color: #9ca3af;
+}
+
+/* RESPONSIVE - Mobile Ansicht */
+@media (max-width: 960px) {
+  .uc-banner {
+    grid-template-columns: 1fr; /* Einspaltig auf Mobile */
+  }
+  
+  .uc-cta {
+    align-items: stretch; /* Buttons über volle Breite */
+  }
+  
+  .uc-btn {
+    width: 100%; /* Buttons über volle Breite */
+  }
+  
+  .uc-groups {
+    justify-content: center; /* Switches zentrieren */
+  }
+}
+
+/* ==========================================
+   DETAILS-MODAL STYLING
+   ========================================== */
+
+/* MODAL-OVERLAY - Vollbild-Hintergrund */
+#dsgvo-details-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--uc-modal-overlay);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: var(--uc-font-family); /* Modal verwendet eigene Schriftart */
+}
+
+/* MODAL-CONTAINER - Zentraler Modal-Box */
+.uc-modal-content {
+  background: var(--uc-modal-background);
+  border-radius: var(--uc-modal-border-radius);
+  max-width: var(--uc-modal-max-width);
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: var(--uc-modal-shadow);
+  font-family: var(--uc-font-family); /* Schriftart explizit setzen */
+}
+
+/* MODAL-HEADER - Titel und Schließen-Button */
+.uc-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding: var(--uc-modal-padding) var(--uc-modal-padding) 0;
+}
+
+.uc-modal-title {
+  margin: 0;
+  font-size: var(--uc-modal-title-size);
+  color: var(--uc-text);
+  font-weight: var(--uc-font-weight-title);
+  font-family: var(--uc-font-family);
+}
+
+.uc-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--uc-modal-close-color);
+  padding: 5px;
+  line-height: 1;
+  font-family: var(--uc-font-family);
+}
+
+.uc-modal-close:hover {
+  color: var(--uc-text);
+}
+
+/* MODAL-BODY - Hauptinhalt */
+.uc-modal-body {
+  padding: 0 var(--uc-modal-padding) var(--uc-modal-padding);
+}
+
+.uc-modal-intro {
+  color: var(--uc-service-text-color);
+  line-height: 1.6;
+  margin-bottom: 25px;
+  font-family: var(--uc-font-family);
+  font-size: var(--uc-font-size-text);
+}
+
+/* KATEGORIE-BEREICHE - Cookie-Kategorien */
+.uc-category-container {
+  margin-bottom: 20px;
+  border: 1px solid var(--uc-category-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.uc-category-header {
+  background: var(--uc-category-background);
+  padding: 20px;
+}
+
+.uc-category-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.uc-category-title {
+  margin: 0;
+  color: var(--uc-text);
+  font-size: 18px;
+  flex: 1;
+  font-family: var(--uc-font-family);
+  font-weight: var(--uc-font-weight-title);
+}
+
+/* KATEGORIE-TOGGLE - Switch für Kategorien */
+.uc-category-toggle {
+  position: relative;
+  display: inline-block;
+  width: var(--uc-switch-width);
+  height: var(--uc-switch-height);
+  flex: none;
+}
+
+.uc-category-toggle input {
+  appearance: none;
+  width: var(--uc-switch-width);
+  height: var(--uc-switch-height);
+  margin: 0;
+  outline: none;
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+
+.uc-category-toggle input:disabled {
+  cursor: not-allowed;
+}
+
+.uc-category-toggle .uc-switch-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--uc-switch-width);
+  height: var(--uc-switch-height);
+  background: var(--uc-switch-off);
+  border-radius: calc(var(--uc-switch-height) / 2);
+  transition: background 0.2s ease;
+  z-index: 1;
+}
+
+.uc-category-toggle input:checked + .uc-switch-track {
+  background: var(--uc-switch-on);
+}
+
+.uc-category-toggle .uc-switch-thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: var(--uc-switch-thumb-size);
+  height: var(--uc-switch-thumb-size);
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: left 0.2s ease;
+  z-index: 1;
+}
+
+.uc-category-description {
+  color: var(--uc-service-text-color);
+  line-height: 1.5;
+  margin-bottom: 15px;
+  font-family: var(--uc-font-family);
+  font-size: var(--uc-font-size-text);
+}
+
+/* KATEGORIE-HEADER - Klickbarer Bereich */
+.uc-category-header {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  padding: 25px;
+  margin: -25px;
+  border-radius: 6px;
+}
+
+.uc-category-header:hover {
+  background-color: rgba(0, 102, 204, 0.05);
+}
+
+/* Pfeil-Symbol für Kategorie-Aufklappen */
+.uc-toggle-arrow {
+  font-size: 16px;
+  margin-right: 8px;
+  transition: transform 0.2s ease;
+  display: inline-block;
+  color: var(--uc-primary);
+  font-weight: bold;
+}
+
+.uc-services-details {
+  margin-top: 15px;
+  padding: 15px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #f0f0f0;
+}
+
+.uc-service-item {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.uc-service-item:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.uc-service-name {
+  font-weight: 600;
+  color: var(--uc-text);
+  margin-bottom: 8px;
+  font-family: var(--uc-font-family);
+  font-size: var(--uc-font-size-text);
+}
+
+.uc-service-description {
+  color: var(--uc-service-text-color);
+  margin-bottom: 8px;
+  line-height: 1.5;
+  font-family: var(--uc-font-family);
+  font-size: var(--uc-font-size-text);
+}
+
+.uc-service-info {
+  font-size: 12px;
+  color: var(--uc-text-muted);
+  margin-bottom: 4px;
+  font-family: var(--uc-font-family);
+}
+
+.uc-service-info strong {
+  color: #555;
+}
+
+.uc-service-cookies {
+  color: #777;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.uc-service-link {
+  color: var(--uc-service-link-color);
+  text-decoration: none;
+  font-size: 12px;
+  font-family: var(--uc-font-family);
+}
+
+.uc-service-link:hover {
+  text-decoration: underline;
+}
+
+/* MODAL-BUTTONS - Aktions-Buttons */
+.uc-modal-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+  padding: 20px var(--uc-modal-padding);
+  border-top: 1px solid #f0f0f0;
+}
+
+.uc-modal-button {
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: 500;
+  flex: 1; /* Gleichmäßige Verteilung über volle Breite */
+  font-family: var(--uc-font-family);
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+/* Button-spezifische Farben */
+.uc-modal-button.withdraw {
+  background: #dc3545;
+  color: white;
+}
+
+.uc-modal-button.withdraw:hover {
+  background: #c82333;
+}
+
+.uc-modal-button.reject {
+  background: #6c757d;
+  color: white;
+}
+
+.uc-modal-button.reject:hover {
+  background: #5a6268;
+}
+
+.uc-modal-button.selection {
+  background: #f8f9fa;
+  color: #333;
+  border: 2px solid #e0e0e0;
+}
+
+.uc-modal-button.selection:hover {
+  background: #e9ecef;
+  border-color: #dee2e6;
+}
+
+.uc-modal-button.accept {
+  background: var(--uc-primary);
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 102, 204, 0.2);
+}
+
+.uc-modal-button.accept:hover {
+  background: #0052a3;
+}
+
+/* GDPR-RECHTE SEKTION */
+.uc-gdpr-rights {
+  margin-top: 25px;
+  padding-top: 25px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.uc-gdpr-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--uc-text);
+  margin-bottom: 15px;
+  font-family: var(--uc-font-family);
+}
+
+.uc-gdpr-content {
+  font-size: 13px;
+  color: var(--uc-service-text-color);
+  line-height: 1.6;
+  font-family: var(--uc-font-family);
+}
+
+/* RESPONSIVE DESIGN - Mobile Anpassungen */
+@media (max-width: 768px) {
+  #dsgvo-details-modal {
+    padding: 10px;
+    align-items: flex-start;
+  }
+  
+  .uc-modal-content {
+    margin-top: 20px;
+    max-height: calc(100vh - 40px);
+  }
+  
+  .uc-modal-header,
+  .uc-modal-body,
+  .uc-modal-buttons {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+  
+  .uc-modal-title {
+    font-size: 20px;
+  }
+  
+  .uc-category-header {
+    padding: 15px;
+  }
+  
+  .uc-modal-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .uc-modal-button {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .uc-category-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .uc-category-toggle {
+    align-self: flex-end;
+  }
+}`,
+    custom_js: `// Banner-Funktionalität wird vollständig vom load.js übernommen
+    // Hier ist kein zusätzlicher Code erforderlich`
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

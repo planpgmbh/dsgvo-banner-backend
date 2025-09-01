@@ -70,12 +70,40 @@ const createProject = catchAsync(async (req, res) => {
       { name: 'Marketing Cookies', description: 'Diese Cookies werden verwendet, um Ihnen relevante Werbung zu zeigen.', required: false, sort_order: 4 }
     ];
 
-    // Insert default categories
+    // Insert default categories and capture necessary category ID
+    let necessaryCategoryId = null;
+    
     for (const category of defaultCategories) {
-      await connection.execute(`
+      const [categoryResult] = await connection.execute(`
         INSERT INTO cookie_categories (project_id, name, description, required, sort_order)
         VALUES (?, ?, ?, ?, ?)
       `, [projectId, category.name, category.description, category.required, category.sort_order]);
+      
+      // Store the ID of the necessary cookies category
+      if (category.required) {
+        necessaryCategoryId = categoryResult.insertId;
+      }
+    }
+
+    // Add default necessary cookie for banner consent
+    if (necessaryCategoryId) {
+      await connection.execute(`
+        INSERT INTO cookie_services (
+          project_id, category_id, name, description, provider, purpose, 
+          cookie_names, retention_period, privacy_policy_url, script_code
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        projectId,
+        necessaryCategoryId,
+        'DSGVO Banner Cookie',
+        'Speichert den Zustimmungsstatus des Benutzers für Cookies auf der aktuellen Domäne.',
+        'Eigene Website',
+        'Speicherung der Cookie-Einwilligung',
+        'dsgvo_consent',
+        '12 Monate',
+        '',
+        ''
+      ]);
     }
 
     // Commit transaction

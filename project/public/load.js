@@ -43,6 +43,34 @@
   }
 
   /**
+   * Dynamically inserts category switches into the banner HTML
+   * @param {HTMLElement} bannerContainer - The banner container element
+   */
+  function insertCategorySwitches(bannerContainer) {
+    const switchesContainer = bannerContainer.querySelector('.uc-groups');
+    if (!switchesContainer || !bannerConfig.categories) return;
+
+    // Find non-required categories and generate switches for them
+    bannerConfig.categories
+      .filter(category => !category.required)
+      .forEach(category => {
+        const switchHtml = `
+          <div class="uc-group">
+            <span class="uc-label">${category.name.replace(' Cookies', '')}</span>
+            <label class="uc-switch" title="${category.name}">
+              <input id="switch-${category.name.toLowerCase().replace(/\s+/g, '-').replace('-cookies', '')}" 
+                     data-category-id="${category.id}" 
+                     type="checkbox" 
+                     aria-label="${category.name}">
+              <span class="uc-switch-track"><span class="uc-switch-thumb"></span></span>
+            </label>
+          </div>
+        `;
+        switchesContainer.insertAdjacentHTML('beforeend', switchHtml);
+      });
+  }
+
+  /**
    * Restores previously saved consent settings to the banner switches
    * @param {HTMLElement} bannerContainer - The banner container element
    */
@@ -300,6 +328,9 @@
         document.body.appendChild(bannerContainer);
         bannerContainer.addEventListener('click', handleBannerClick);
         
+        // Insert category switches dynamically
+        insertCategorySwitches(bannerContainer);
+        
         // Restore previous consent settings to switches
         restoreConsentSettings(bannerContainer);
         
@@ -325,33 +356,29 @@
     const target = event.target.closest('button, a');
     if (!target) return;
     
-    // Handle "Details zeigen" link
-    if (target.id === 'uc-details' || target.getAttribute('href') === '#' && target.textContent.includes('Details')) {
+    // Handle details link
+    if (target.id === 'cookie-details') {
       event.preventDefault();
       showDetailsModal();
       return;
     }
 
-    // Check for data-action attribute first (new system)
+    // Handle banner buttons
     const action = target.getAttribute('data-action');
-    if (action) {
-      switch (action) {
-        case 'acceptAll':
-          dsgvoBannerAPI.acceptAllCookies();
-          return;
-        case 'acceptSelection':
-          dsgvoBannerAPI.acceptSelection();
-          return;
-        case 'necessaryOnly':
-          dsgvoBannerAPI.necessaryOnly();
-          return;
-        case 'rejectAll':
-          dsgvoBannerAPI.rejectAllCookies();
-          return;
-      }
+    switch (action) {
+      case 'acceptAll':
+        dsgvoBannerAPI.acceptAllCookies();
+        return;
+      case 'acceptSelection':
+        dsgvoBannerAPI.acceptSelection();
+        return;
+      case 'necessaryOnly':
+        dsgvoBannerAPI.necessaryOnly();
+        return;
+      case 'rejectAll':
+        dsgvoBannerAPI.rejectAllCookies();
+        return;
     }
-
-    // No action matched - banner uses data-action attributes
   }
 
   /**
@@ -382,54 +409,21 @@
     // Create modal container
     const modal = document.createElement('div');
     modal.id = 'dsgvo-details-modal';
-    modal.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      box-sizing: border-box;
-    `;
     
     // Create modal content
     const modalContent = document.createElement('div');
-    modalContent.style.cssText = `
-      background: white;
-      border-radius: 12px;
-      max-width: 900px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      position: relative;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    `;
+    modalContent.className = 'uc-modal-content';
     
     // Generate content HTML
     let contentHTML = `
-      <div style="padding: 30px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-          <h2 style="margin: 0; font-size: 24px; color: #333;">Cookie-Einstellungen</h2>
-          <button id="close-details-modal" style="
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-            padding: 5px;
-            line-height: 1;
-          ">&times;</button>
-        </div>
-        
-        <div style="margin-bottom: 25px;">
-          <p style="color: #666; line-height: 1.6; margin-bottom: 15px;">
-            ${bannerConfig.project.about_cookies_text || 'Cookies sind kleine Textdateien, die von Websites verwendet werden, um die Benutzererfahrung zu verbessern.'}
-          </p>
+      <div class="uc-modal-header">
+        <h2 class="uc-modal-title">Cookie-Einstellungen</h2>
+        <button id="close-details-modal" class="uc-modal-close">&times;</button>
+      </div>
+      
+      <div class="uc-modal-body">
+        <div class="uc-modal-intro">
+          <p>${bannerConfig.project.about_cookies_text || 'Cookies sind kleine Textdateien, die von Websites verwendet werden, um die Benutzererfahrung zu verbessern.'}</p>
         </div>
     `;
     
@@ -443,70 +437,29 @@
       const isChecked = isRequired || existingConsent[category.id] || false;
       
       contentHTML += `
-        <div style="margin-bottom: 20px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
-          <div style="background: #f8f9fa; padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-              <h3 style="margin: 0; color: #333; font-size: 18px; flex: 1;">${category.name}</h3>
-              <label style="position: relative; display: inline-block; width: 56px; height: 32px; flex: none;">
+        <div class="uc-category-container">
+          <div class="uc-category-header" onclick="toggleCategoryDetails(${categoryIndex})" data-category-index="${categoryIndex}">
+            <div class="uc-category-top">
+              <h3 class="uc-category-title">
+                ${categoryServices.length > 0 ? `<span class="uc-toggle-arrow" id="arrow-${categoryIndex}">></span>` : ''}
+                ${category.name}
+              </h3>
+              <label class="uc-category-toggle" onclick="event.stopPropagation()">
                 <input 
                   type="checkbox" 
                   data-category-id="${category.id}"
                   ${isChecked ? 'checked' : ''}
                   ${isRequired ? 'disabled' : ''}
-                  style="
-                    appearance: none;
-                    width: 56px;
-                    height: 32px;
-                    margin: 0;
-                    outline: none;
-                    cursor: ${isRequired ? 'not-allowed' : 'pointer'};
-                  "
                 >
-                <span style="
-                  position: absolute;
-                  inset: 0;
-                  border-radius: 999px;
-                  background: ${isChecked ? '#111827' : '#e5e7eb'};
-                  transition: background 0.2s ease;
-                "></span>
-                <span style="
-                  position: absolute;
-                  top: 4px;
-                  left: ${isChecked ? '28px' : '4px'};
-                  width: 24px;
-                  height: 24px;
-                  border-radius: 999px;
-                  background: #fff;
-                  transition: left 0.2s ease;
-                  box-shadow: 0 1px 2px rgba(0,0,0,.25);
-                "></span>
+                <span class="uc-switch-track" style="background: ${isChecked ? 'var(--uc-switch-on)' : 'var(--uc-switch-off)'}"></span>
+                <span class="uc-switch-thumb" style="left: ${isChecked ? '24px' : '4px'}"></span>
               </label>
             </div>
-            <p style="margin: 0; color: #666; font-size: 14px;">${category.description || 'Keine Beschreibung verfügbar'}</p>
-            <p style="margin: 8px 0 0 0; font-size: 12px; color: #888;">
-              ${isRequired ? 'Erforderlich (kann nicht deaktiviert werden)' : 'Optional'}
-            </p>
+            <p class="uc-category-description">${category.description || 'Keine Beschreibung verfügbar'}</p>
+            ${isRequired ? '<p class="uc-service-info">Erforderlich (kann nicht deaktiviert werden)</p>' : ''}
             
             ${categoryServices.length > 0 ? `
-              <button 
-                type="button"
-                onclick="toggleCategoryDetails(${categoryIndex})"
-                id="toggle-category-${categoryIndex}"
-                style="
-                  background: none;
-                  border: 1px solid #ddd;
-                  border-radius: 4px;
-                  padding: 6px 12px;
-                  font-size: 12px;
-                  cursor: pointer;
-                  color: #666;
-                  margin-top: 15px;
-                "
-              >
-                Details anzeigen (${categoryServices.length} ${categoryServices.length === 1 ? 'Service' : 'Services'})
-              </button>
-              
-              <div id="category-details-${categoryIndex}" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+              <div id="category-details-${categoryIndex}" class="uc-services-details" style="display: none;">
             ` : ''}
       `;
       
@@ -523,23 +476,22 @@
           );
           
           contentHTML += `
-            <div style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 6px; border: 1px solid #f0f0f0;">
-              <h4 style="margin: 0 0 10px 0; color: #333; font-size: 15px; font-weight: 600;">${service.name}</h4>
-              <p style="margin: 0 0 12px 0; color: #666; font-size: 13px; line-height: 1.4;">
+            <div class="uc-service-item">
+              <h4 class="uc-service-name">${service.name}</h4>
+              <p class="uc-service-description">
                 ${service.description || 'Keine Beschreibung verfügbar'}
               </p>
               
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px; margin-bottom: 12px;">
-                ${service.provider ? `<div><strong style="color: #555;">Anbieter:</strong><br><span style="color: #777;">${service.provider}</span></div>` : ''}
-                ${service.retention_period ? `<div><strong style="color: #555;">Speicherdauer:</strong><br><span style="color: #777;">${service.retention_period}</span></div>` : ''}
-                ${service.purpose ? `<div><strong style="color: #555;">Zweck:</strong><br><span style="color: #777;">${service.purpose}</span></div>` : ''}
-                ${service.cookie_names ? `<div><strong style="color: #555;">Cookie-Namen:</strong><br><span style="color: #777; font-family: monospace; font-size: 11px;">${service.cookie_names}</span></div>` : ''}
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                ${service.provider ? `<div class="uc-service-info"><strong>Anbieter:</strong><br><span style="color: #777;">${service.provider}</span></div>` : ''}
+                ${service.retention_period ? `<div class="uc-service-info"><strong>Speicherdauer:</strong><br><span style="color: #777;">${service.retention_period}</span></div>` : ''}
+                ${service.purpose ? `<div class="uc-service-info"><strong>Zweck:</strong><br><span style="color: #777;">${service.purpose}</span></div>` : ''}
+                ${service.cookie_names ? `<div class="uc-service-info"><strong>Cookie-Namen:</strong><br><span class="uc-service-cookies">${service.cookie_names}</span></div>` : ''}
               </div>
-              
               
               ${service.privacy_policy_url ? `
                 <div style="margin-top: 10px;">
-                  <a href="${service.privacy_policy_url}" target="_blank" style="color: #0066cc; text-decoration: none; font-size: 12px;">
+                  <a href="${service.privacy_policy_url}" target="_blank" class="uc-service-link">
                     Datenschutzerklärung des Anbieters ansehen →
                   </a>
                 </div>
@@ -553,8 +505,8 @@
         `;
       } else {
         contentHTML += `
-          <p style="color: #888; font-style: italic; margin: 15px 0 0 0; font-size: 13px;">
-            Keine Services in dieser Kategorie konfiguriert.
+          <p class="uc-service-info" style="font-style: italic; margin: 15px 0 0 0;">
+            Wir nutzen diese Cookie-Typen nicht.
           </p>
         `;
       }
@@ -565,57 +517,22 @@
       `;
     });
     
-    // Add action buttons
+    // Close modal-body and add GDPR rights section and action buttons
     contentHTML += `
-        <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
-          <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-            <button id="revoke-consent-details" style="
-              background: #dc3545;
-              color: white;
-              border: none;
-              border-radius: 8px;
-              padding: 12px 20px;
-              font-size: 15px;
-              cursor: pointer;
-              font-weight: 500;
-              min-width: 160px;
-            ">Einwilligung widerrufen</button>
-            <button id="reject-all-details" style="
-              background: #6c757d;
-              color: white;
-              border: none;
-              border-radius: 8px;
-              padding: 12px 20px;
-              font-size: 15px;
-              cursor: pointer;
-              font-weight: 500;
-              min-width: 160px;
-            ">Alle ablehnen</button>
-            <button id="accept-selection-details" style="
-              background: #f8f9fa;
-              color: #333;
-              border: 2px solid #e0e0e0;
-              border-radius: 8px;
-              padding: 12px 20px;
-              font-size: 15px;
-              cursor: pointer;
-              font-weight: 500;
-              min-width: 160px;
-            ">Auswahl bestätigen</button>
-            <button id="accept-all-details" style="
-              background: #0066cc;
-              color: white;
-              border: none;
-              border-radius: 8px;
-              padding: 12px 20px;
-              font-size: 15px;
-              cursor: pointer;
-              font-weight: 600;
-              min-width: 160px;
-              box-shadow: 0 2px 4px rgba(0, 102, 204, 0.2);
-            ">Alle bestätigen</button>
+        
+        <div class="uc-gdpr-rights">
+          <h3 class="uc-gdpr-title">Ihre Rechte nach der DSGVO</h3>
+          <div class="uc-gdpr-content">
+            <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Bei Fragen wenden Sie sich an den Datenschutzbeauftragten oder die verantwortliche Stelle.</p>
           </div>
         </div>
+      </div>
+      
+      <div class="uc-modal-buttons">
+        <button id="revoke-consent-details" class="uc-modal-button withdraw">Einwilligung widerrufen</button>
+        <button id="reject-all-details" class="uc-modal-button reject">Alle ablehnen</button>
+        <button id="accept-selection-details" class="uc-modal-button selection">Auswahl bestätigen</button>
+        <button id="accept-all-details" class="uc-modal-button accept">Alle bestätigen</button>
       </div>
     `;
     
@@ -625,14 +542,14 @@
     // Add toggle functionality for category details
     window.toggleCategoryDetails = (categoryIndex) => {
       const detailsDiv = document.getElementById(`category-details-${categoryIndex}`);
-      const toggleBtn = document.getElementById(`toggle-category-${categoryIndex}`);
+      const arrow = document.getElementById(`arrow-${categoryIndex}`);
       
-      if (detailsDiv && toggleBtn) {
+      if (detailsDiv && arrow) {
         const isVisible = detailsDiv.style.display !== 'none';
+        
         detailsDiv.style.display = isVisible ? 'none' : 'block';
-        toggleBtn.textContent = isVisible ? 
-          `Details anzeigen (${servicesList.filter(s => s.category_id === categoriesList[categoryIndex].id).length} ${servicesList.filter(s => s.category_id === categoriesList[categoryIndex].id).length === 1 ? 'Service' : 'Services'})` :
-          'Details verbergen';
+        arrow.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(90deg)';
+        arrow.textContent = '>';
       }
     };
     
@@ -640,12 +557,12 @@
     modalContent.querySelectorAll('input[data-category-id]').forEach(checkbox => {
       if (!checkbox.disabled) {
         checkbox.addEventListener('change', (e) => {
-          const span = e.target.nextElementSibling;
-          const thumb = span.nextElementSibling;
+          const track = e.target.nextElementSibling;  // .uc-switch-track
+          const thumb = track.nextElementSibling;     // .uc-switch-thumb
           const isChecked = e.target.checked;
           
-          span.style.background = isChecked ? '#111827' : '#e5e7eb';
-          thumb.style.left = isChecked ? '28px' : '4px';
+          track.style.background = isChecked ? 'var(--uc-switch-on)' : 'var(--uc-switch-off)';
+          thumb.style.left = isChecked ? '24px' : '4px';
         });
       }
     });
@@ -774,6 +691,9 @@
 
     document.body.appendChild(bannerContainer);
     bannerContainer.addEventListener('click', handleBannerClick);
+    
+    // Insert category switches dynamically
+    insertCategorySwitches(bannerContainer);
     
     // Restore previous consent settings if banner is reopened
     restoreConsentSettings(bannerContainer);

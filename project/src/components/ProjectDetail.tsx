@@ -864,14 +864,39 @@ export const ProjectDetail: React.FC = () => {
 
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <h4 className="font-medium text-yellow-800 mb-2">
-                  Wichtige Hinweise zum Styling
+                  ⚠️ Wichtige Hinweise zum Styling
                 </h4>
-                <ul className="text-sm text-yellow-700 space-y-1">
-                  <li>• Verwenden Sie Platzhalter wie [#TITLE#], [#TEXT#], [#LANGUAGE#] für dynamische Inhalte</li>
-                  <li>• CSS wird global angewendet - verwenden Sie spezifische Selektoren</li>
-                  <li>• JavaScript-Funktionen sollten keine Konflikte mit bestehenden Funktionen verursachen</li>
-                  <li>• Testen Sie Ihre Änderungen immer in der Vorschau</li>
-                </ul>
+                <div className="text-sm text-yellow-700 space-y-3">
+                  <div>
+                    <p className="font-semibold mb-1">🔘 BANNER-BUTTONS (erforderlich):</p>
+                    <ul className="ml-4 space-y-1 font-mono text-xs">
+                      <li>• data-action="acceptAll" → "Alle akzeptieren" Button</li>
+                      <li>• data-action="necessaryOnly" → "Nur notwendige" Button</li>
+                      <li>• data-action="acceptSelection" → "Auswahl speichern" Button</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <p className="font-semibold mb-1">🔘 CATEGORY-SWITCHES (erforderlich):</p>
+                    <ul className="ml-4 space-y-1 font-mono text-xs">
+                      <li>• id="switch-preferences" → Präferenzen Switch</li>
+                      <li>• id="switch-statistics" → Statistiken Switch</li>
+                      <li>• id="switch-marketing" → Marketing Switch</li>
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <p className="font-semibold mb-1">🔘 DETAILS-LINK (optional):</p>
+                    <ul className="ml-4 space-y-1 font-mono text-xs">
+                      <li>• id="cookie-details" → "Details anzeigen" Link</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="border-t pt-2 mt-3">
+                    <p className="font-semibold text-red-700">❌ Andere ID-Namen funktionieren NICHT!</p>
+                    <p className="text-xs">Verwenden Sie Platzhalter wie [#TITLE#], [#TEXT#] für dynamische Inhalte</p>
+                  </div>
+                </div>
               </div>
 
               <div>
