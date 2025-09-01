@@ -24,10 +24,10 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     custom_html: `<div class="uc-banner-wrap" role="dialog" aria-labelledby="uc-title" aria-describedby="uc-desc">
     <section class="uc-banner">
       <div>
-        <h2 id="uc-title" class="uc-headline">[#TITLE#]</h2>
-        <p id="uc-desc" class="uc-desc">
+        <div id="uc-title" class="uc-headline">[#TITLE#]</div>
+        <div id="uc-desc" class="uc-desc">
           [#TEXT#]        
-        </p>
+        </div>
 
         <div class="uc-groups" aria-label="Cookie-Kategorien">
           <div class="uc-group">
@@ -434,10 +434,6 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   overflow: hidden;
 }
 
-.uc-category-header {
-  background: var(--uc-category-background);
-  padding: 20px;
-}
 
 .uc-category-top {
   display: flex;
@@ -519,12 +515,13 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 }
 
 /* KATEGORIE-HEADER - Klickbarer Bereich */
-#dsgvo-details-modal .uc-category-header {
-  cursor: pointer !important;
-  transition: background-color 0.2s ease !important;
-  padding: 25px !important;
-  margin: -25px !important;
-  border-radius: 6px !important;
+.uc-category-header {
+  background: var(--uc-category-background);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  padding: 25px;
+  margin: 0;
+  border-radius: 6px;
 }
 
 #dsgvo-details-modal .uc-category-header:hover {
@@ -930,7 +927,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           </div>
 
           <div className="mt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Styling (Erweiterte Einstellungen)</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Styling</h3>
             
             <div className="space-y-4">
               <details className="border border-gray-200 rounded-lg">
@@ -1020,6 +1017,23 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 <p className="text-xs text-gray-500 mt-1">
                   Dieser Text wird im "Über Cookies" Tab des Banners angezeigt.
                 </p>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mt-4">
+                <h4 className="text-sm font-semibold text-yellow-800 mb-2">Wichtige Hinweise zum Styling</h4>
+                <div className="text-sm text-yellow-700 space-y-2">
+                  <p>
+                    Das Banner verwendet spezielle CSS-Klassen mit dem "uc-" Prefix (z.B. .uc-banner, .uc-headline) 
+                    um Konflikte mit bestehenden Website-Styles zu vermeiden.
+                  </p>
+                  <p>
+                    Es werden ausschließlich DIV-Elemente mit CSS-Klassen verwendet, um CSS-Konflikte mit 
+                    Standard-HTML-Tags (h1, h2, p) der Host-Website zu verhindern.
+                  </p>
+                  <p>
+                    Alle Styles sind in sich geschlossen und verwenden CSS-Variablen für einfache Anpassungen.
+                  </p>
+                </div>
               </div>
             </div>
           </div>

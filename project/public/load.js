@@ -447,13 +447,13 @@
     // Generate content HTML
     let contentHTML = `
       <div class="uc-modal-header">
-        <h2 class="uc-modal-title">Cookie-Einstellungen</h2>
+        <div class="uc-modal-title">Cookie-Einstellungen</div>
         <button id="close-details-modal" class="uc-modal-close">&times;</button>
       </div>
       
       <div class="uc-modal-body">
         <div class="uc-modal-intro">
-          <p>${bannerConfig.project.about_cookies_text || 'Cookies sind kleine Textdateien, die von Websites verwendet werden, um die Benutzererfahrung zu verbessern.'}</p>
+          <div>${bannerConfig.project.about_cookies_text || 'Cookies sind kleine Textdateien, die von Websites verwendet werden, um die Benutzererfahrung zu verbessern.'}</div>
         </div>
     `;
     
@@ -470,10 +470,10 @@
         <div class="uc-category-container">
           <div class="uc-category-header" onclick="toggleCategoryDetails(${categoryIndex})" data-category-index="${categoryIndex}">
             <div class="uc-category-top">
-              <h3 class="uc-category-title">
+              <div class="uc-category-title">
                 ${categoryServices.length > 0 ? `<span class="uc-toggle-arrow" id="arrow-${categoryIndex}">></span>` : ''}
                 ${category.name}
-              </h3>
+              </div>
               <label class="uc-category-toggle" onclick="event.stopPropagation()">
                 <input 
                   type="checkbox" 
@@ -485,8 +485,8 @@
                 <span class="uc-switch-thumb" style="left: ${isChecked ? '24px' : '4px'}"></span>
               </label>
             </div>
-            <p class="uc-category-description">${category.description || 'Keine Beschreibung verfügbar'}</p>
-            ${isRequired ? '<p class="uc-service-info">Erforderlich (kann nicht deaktiviert werden)</p>' : ''}
+            <div class="uc-category-description">${category.description || 'Keine Beschreibung verfügbar'}</div>
+            ${isRequired ? '<div class="uc-service-info">Erforderlich (kann nicht deaktiviert werden)</div>' : ''}
             
             ${categoryServices.length > 0 ? `
               <div id="category-details-${categoryIndex}" class="uc-services-details" style="display: none;">
@@ -507,10 +507,10 @@
           
           contentHTML += `
             <div class="uc-service-item">
-              <h4 class="uc-service-name">${service.name}</h4>
-              <p class="uc-service-description">
+              <div class="uc-service-name">${service.name}</div>
+              <div class="uc-service-description">
                 ${service.description || 'Keine Beschreibung verfügbar'}
-              </p>
+              </div>
               
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                 ${service.provider ? `<div class="uc-service-info"><strong>Anbieter:</strong><br><span style="color: #777;">${service.provider}</span></div>` : ''}
@@ -535,9 +535,9 @@
         `;
       } else {
         contentHTML += `
-          <p class="uc-service-info" style="font-style: italic; margin: 15px 0 0 0;">
+          <div class="uc-service-info" style="font-style: italic; margin: 15px 0 0 0;">
             Wir nutzen diese Cookie-Typen nicht.
-          </p>
+          </div>
         `;
       }
       
@@ -551,9 +551,9 @@
     contentHTML += `
         
         <div class="uc-gdpr-rights">
-          <h3 class="uc-gdpr-title">Ihre Rechte nach der DSGVO</h3>
+          <div class="uc-gdpr-title">Ihre Rechte nach der DSGVO</div>
           <div class="uc-gdpr-content">
-            <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Bei Fragen wenden Sie sich an den Datenschutzbeauftragten oder die verantwortliche Stelle.</p>
+            <div>Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Bei Fragen wenden Sie sich an den Datenschutzbeauftragten oder die verantwortliche Stelle.</div>
           </div>
         </div>
       </div>
