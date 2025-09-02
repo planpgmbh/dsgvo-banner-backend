@@ -582,11 +582,13 @@
                 ${service.retention_period ? `<div class="uc-service-info"><strong>Speicherdauer:</strong><br><span style="color: #777;">${service.retention_period}</span></div>` : ''}
                 ${service.purpose ? `<div class="uc-service-info"><strong>Zweck:</strong><br><span style="color: #777;">${service.purpose}</span></div>` : ''}
                 ${service.cookie_names ? `<div class="uc-service-info"><strong>Cookie-Namen:</strong><br><span class="uc-service-cookies">${service.cookie_names}</span></div>` : ''}
+                <div class="uc-service-info"><strong>Rechtsgrundlage:</strong><br><span style="color: #777;">${legalBasis}</span></div>
+                ${isThirdCountry ? `<div class="uc-service-info"><strong>Drittlandtransfer:</strong><br><span style="color: #c00;">Mögliche Übermittlung in Drittländer (z. B. USA)</span></div>` : ''}
               </div>
               
               ${service.privacy_policy_url ? `
                 <div style="margin-top: 10px;">
-                  <a href="${service.privacy_policy_url}" target="_blank" class="uc-service-link">
+                  <a href="${service.privacy_policy_url}" target="_blank" rel="noopener noreferrer" class="uc-service-link">
                     Datenschutzerklärung des Anbieters ansehen →
                   </a>
                 </div>
