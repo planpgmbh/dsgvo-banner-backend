@@ -37,6 +37,49 @@ Die folgenden Schritte reichen, damit ein Agent wie Codex direkt loslegen kann:
 - DB-Schema-Hinweis:
   - `backend/init.sql` läuft nur auf frischen Datenbanken. Bei Schema-Änderungen (z. B. neue Projektfelder) entweder DB-Volume erneuern oder `ALTER TABLE` manuell ausführen.
 
+## 🚢 Deployment (Produktion)
+
+Voraussetzungen
+- Domain: `dsgvobanner.plan-p.com`
+- Traefik läuft im externen Netzwerk `proxy` und besitzt einen CertResolver `http-resolver` (ACME/TLS)
+- Server `.env` vorhanden (identisch zu lokal, aber mit sicheren Werten), `NODE_ENV=production`, `CORS_ORIGIN` korrekt gepflegt
+
+Start (Produktion)
+```
+docker compose up -d --build
+```
+
+Health/Prüfungen
+- Container-Status: `docker compose ps`
+- Healthchecks: Backend/Frontend zeigen `healthy`
+- Smoke-Tests:
+  - Admin/Frontend: https://dsgvobanner.plan-p.com
+  - API Config: https://dsgvobanner.plan-p.com/api/config?id=1
+  - Admin-Login: POST https://dsgvobanner.plan-p.com/api/auth/login
+
+Erstinstallation (frische DB)
+ACHTUNG: Löscht bestehende Daten dieses Systems.
+```
+docker compose down
+sudo rm -rf /etc/docker/databases/dsgvobanner/*
+docker compose up -d --build
+```
+
+Sicherheit/Ports
+- Backend: wird nur intern geroutet (Port 3001 ist lokal gebunden)
+- DB: nur lokal gebunden (127.0.0.1:3318)
+
+Wartung/Updates
+```
+git pull origin master
+docker compose up -d --build
+```
+
+Backups (Beispiel)
+```
+docker exec db_dsgvobanner mysqldump -u root -p dsgvobanner > backup.sql
+```
+
 ## 🚀 Core Features
 
 - **Zentrales Admin-Panel** zur Verwaltung mehrerer unabhängiger Projekte/Websites
