@@ -6,6 +6,7 @@
   const SCRIPT_SELECTOR = 'script[src*="load.js"]';
   const CONSENT_COOKIE_NAME = 'dsgvo_consent';
   const BANNER_CONTAINER_ID = 'dsgvo-banner-container';
+  const OPEN_HASH = '#cookie-settings'; // Deep-Link zum Öffnen der Cookie-Einstellungen
   let DEBUG = false; // toggled via script param (?debug=1) or localStorage('dsgvo_debug')
 
   // Banner uses data-action attributes for button handling
@@ -391,6 +392,39 @@
       showDetailsModal();
     }
   };
+
+  // --- Deep-Link & Menü-Links (hash-basiert) ---
+  function openDetailsWithRetry(timeoutMs = 8000) {
+    const start = Date.now();
+    const iv = setInterval(() => {
+      if (bannerConfig) {
+        try { showDetailsModal(); } catch (e) { logError('Failed to open details via hash:', e.message); }
+        clearInterval(iv);
+      } else if (Date.now() - start > timeoutMs) {
+        clearInterval(iv);
+      }
+    }, 200);
+  }
+
+  function maybeOpenFromHash() {
+    try {
+      if (location.hash === OPEN_HASH) {
+        logInfo('🔗 Hash detected, opening Cookie-Einstellungen');
+        openDetailsWithRetry();
+      }
+    } catch (_) {}
+  }
+
+  // Öffnen bei Klick auf Links mit href="#cookie-settings"
+  document.addEventListener('click', (e) => {
+    const a = e.target && e.target.closest && e.target.closest(`a[href="${OPEN_HASH}"]`);
+    if (!a) return;
+    e.preventDefault();
+    openDetailsWithRetry();
+  });
+
+  // Öffnen bei Hash-Wechsel und beim initialen Laden
+  window.addEventListener('hashchange', maybeOpenFromHash);
 
   /**
    * Handles clicks on the banner buttons using event delegation.
@@ -1024,9 +1058,12 @@
   if (document.readyState === 'loading') {
     logInfo('Waiting for DOMContentLoaded...');
     document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', maybeOpenFromHash);
   } else {
     logInfo('DOM already ready, initializing...');
     init();
+    // Try immediately if page already loaded with the hash
+    maybeOpenFromHash();
   }
 
 })();

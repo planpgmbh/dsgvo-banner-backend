@@ -230,6 +230,11 @@ Um einen Link zum erneuten Öffnen des Banners bereitzustellen, können Sie die 
 ```
 Die Buttons im Banner (z.B. "Alle akzeptieren") rufen ebenfalls globale Funktionen wie `window.acceptAllCookies()` auf, die vom `load.js`-Skript bereitgestellt werden.
 
+### Deep-Link per Hash (empfohlen für Menüs)
+- Menü-Link-URL: `#cookie-settings` — öffnet direkt das Fenster „Cookie‑Einstellungen“ auf jeder eingebundenen Website.
+- Extern verlinken: `https://ihre-domain.tld/#cookie-settings`
+- Funktioniert ohne weitere Inline-Skripte; `load.js` kümmert sich um das Öffnen, sobald die Konfiguration geladen ist.
+
 ## ♿ Barrierefreiheit & Nutzerführung
 
 - Fokus-Management: Banner und Details-Modal setzen den Fokus korrekt und halten Tab/Shift+Tab innerhalb des Dialogs.

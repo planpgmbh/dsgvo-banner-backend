@@ -518,6 +518,17 @@ export const ProjectDetail: React.FC = () => {
     return `<a href="#" onclick="window.dsgvoBanner.open()">Cookie-Einstellungen ändern</a>`;
   };
 
+  const getHashMenuLink = () => {
+    return `<a href="#cookie-settings">Cookie-Einstellungen</a>`;
+  };
+
+  const getHashExternalLink = () => {
+    const rawDomain = (project?.domain || '').trim();
+    const withProtocol = /^https?:\/\//i.test(rawDomain) ? rawDomain : `https://${rawDomain}`;
+    const normalized = withProtocol.replace(/\/+$/, '');
+    return `${normalized}/#cookie-settings`;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -1257,6 +1268,42 @@ function acceptAllCookies() {
                   <code className="text-sm text-gray-800 font-mono">
                     {getReopenLink()}
                   </code>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                  Deep-Link per Hash (Menü-Link)
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Fügen Sie im WordPress-Menü einen individuellen Link mit der URL <code>#cookie-settings</code> hinzu. 
+                  Das Fenster „Cookie‑Einstellungen“ öffnet sich automatisch, sobald das <code>load.js</code> geladen ist.
+                </p>
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Menü-Link</span>
+                    <button
+                      onClick={() => copyToClipboard(getHashMenuLink())}
+                      className="inline-flex items-center px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      <Copy className="w-4 h-4 mr-1" />
+                      Kopieren
+                    </button>
+                  </div>
+                  <code className="text-sm text-gray-800 font-mono">{getHashMenuLink()}</code>
+                </div>
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Externer Link (vollständige URL)</span>
+                    <button
+                      onClick={() => copyToClipboard(getHashExternalLink())}
+                      className="inline-flex items-center px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      <Copy className="w-4 h-4 mr-1" />
+                      Kopieren
+                    </button>
+                  </div>
+                  <code className="text-sm text-gray-800 font-mono">{getHashExternalLink()}</code>
                 </div>
               </div>
 
