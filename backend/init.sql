@@ -81,7 +81,8 @@ INSERT INTO `projects` (`id`, `name`, `domain`) VALUES (1, 'Test Project', 'loca
 INSERT INTO `cookie_categories` (`id`, `project_id`, `name`, `description`, `required`) VALUES (1, 1, 'Necessary', 'These cookies are essential for the website to function.', true) ON DUPLICATE KEY UPDATE name=name;
 
 -- Add default user for testing
-INSERT INTO `users` (`username`, `password`) VALUES ('philipp', '$2a$10$S6lr3mfigXRqSFdRGP9dueIYAQx4w.gbykhL7YzVLPjF6IdvCAIBW') ON DUPLICATE KEY UPDATE password=password;
+-- Default-Admin (philipp) mit Passwort-Hash für "AdRnuh1"
+INSERT INTO `users` (`username`, `password`) VALUES ('philipp', '$2a$10$mH.I9uy1f5IdkiVxny4da.fC0lRKSQDM3MZx7KIzfwPfPV9FzjuLi') ON DUPLICATE KEY UPDATE password=password;
 
 -- Insert default cookie categories for the test project
 INSERT IGNORE INTO `cookie_categories` (`id`, `project_id`, `name`, `description`, `required`, `sort_order`) VALUES
