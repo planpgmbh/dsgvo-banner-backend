@@ -152,6 +152,35 @@ Um einen Link zum erneuten Öffnen des Banners bereitzustellen, können Sie die 
 ```
 Die Buttons im Banner (z.B. "Alle akzeptieren") rufen ebenfalls globale Funktionen wie `window.acceptAllCookies()` auf, die vom `load.js`-Skript bereitgestellt werden.
 
+## ♿ Barrierefreiheit & Nutzerführung
+
+- Fokus-Management: Banner und Details-Modal setzen den Fokus korrekt und halten Tab/Shift+Tab innerhalb des Dialogs.
+- Aria-Attribute: Banner als Dialog (aria-modal, aria-labelledby/-label), Details-Modal mit Tastatursteuerung (Enter/Space) pro Kategorie.
+- Live-Region: Erfolgreiche Speicherung wird über eine aria-live Region angekündigt.
+
+## 🚫 Gleichwertige Ablehnung
+
+- Neu angelegte Projekte verwenden standardmäßig den Text „Alle ablehnen“ und stellen diesen Button gleichwertig neben „Alle akzeptieren“ dar. Bestehende Projekte können dies im HTML anpassen.
+
+## 🧩 Debugging
+
+- `load.js` Debug-Logs lassen sich einschalten über `?debug=1` im Script-URL oder via `localStorage.setItem('dsgvo_debug','1')`.
+
+## ⏱️ Aufbewahrungsdauer (Retention)
+
+- Die projektweite Einstellung `expiry_months` steuert die Gültigkeit der Einwilligung (Cookie & Server `expires_at`).
+- Für den Consent-Cookie-Service wird die angezeigte „Speicherdauer“ automatisch aus `expiry_months` abgeleitet, falls dort nichts gepflegt ist.
+
+## 🔒 Pseudonymisierung
+
+- IP-Adressen werden für Nachweispflicht pseudonymisiert gespeichert.
+  - IPv4: nur das letzte Oktett wird maskiert (z. B. `192.168.1.XXX`).
+  - IPv6: nur der letzte Block wird maskiert (z. B. `2a02:...:XXXX`).
+
+## 🧱 Consent-before-Tracking
+
+- Drittanbieter-Dienste werden ausschließlich nach erteilter Einwilligung geladen. Vorher findet keine Script-Injektion statt; Preload/Prefetch wird nicht genutzt.
+
 ## 🗃️ Datenbank-Schema
 
 Die Datenbank besteht aus den folgenden Haupttabellen:

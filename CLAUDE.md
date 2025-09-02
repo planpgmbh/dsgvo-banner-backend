@@ -131,6 +131,10 @@ Das System generiert ein JavaScript-Snippet für die Integration:
 
 Das `load.js`-Skript befindet sich in `/project/public/load.js` und wird über Nginx ausgeliefert.
 
+### Debugging
+- Aktivieren: `?debug=1` am Script-Tag oder `localStorage.setItem('dsgvo_debug','1')`.
+- Deaktivieren: `localStorage.removeItem('dsgvo_debug')`.
+
 ### Globale JavaScript-Funktionen (load.js)
 Das Banner-System stellt folgende globale Funktionen zur Verfügung:
 - `window.dsgvoBanner.open()` - Banner erneut öffnen
@@ -166,6 +170,7 @@ Das Banner-System stellt folgende globale Funktionen zur Verfügung:
 - **Vollständige Consent-Historie** mit Zeitstempeln in LocalStorage
 - **Service-basiertes Script-Loading** nur bei erteilter Einwilligung
 - **LocalStorage-Details** für granulare Einwilligungsverfolgung
+ - **Pseudonymisierung**: Nur letzter IP-Block wird maskiert (IPv4/IPv6)
 
 ### 🔄 Technische Implementierung
 
@@ -175,6 +180,9 @@ Das Banner-System stellt folgende globale Funktionen zur Verfügung:
 - **Third-Country Warnings**: USA-Transfer-Hinweise für internationale Dienste
 - **Withdrawal Mechanism**: Vollständiger Consent-Widerruf mit Cookie-Löschung
 - **Data Controller Display**: Projekt-spezifische Verantwortlicher-Information
+ - **A11y**: Fokus-Trap in Banner/Modal, aria-live, role=dialog
+ - **Debug-Flag**: Logs per Query-Param/LocalStorage schaltbar
+ - **Retention-Sync**: Anzeige der Speicherdauer aus `expiry_months`, wenn Service-Feld leer ist
 
 **Test-Integration: `/test-website.html`**
 - DSGVO-Test-Buttons für alle Funktionen
@@ -233,3 +241,4 @@ python3 -m http.server 8080
 - **Rate Limiting**: 100 Requests pro Minute pro IP
 - **SSL**: Wird über Traefik mit Let's Encrypt gehandhabt
 - **Module-Systeme**: Backend (CommonJS) vs Frontend (ESM) - unterschiedliche Import-Syntax beachten
+ - **Consent-Analytics**: Accept-All wird korrekt gezählt (JSON-Boolean-Auswertung)
