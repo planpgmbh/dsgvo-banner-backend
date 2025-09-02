@@ -864,8 +864,6 @@
           }
         }
         if (!bannerWrap.hasAttribute('tabindex')) bannerWrap.tabIndex = -1;
-        // Move focus to banner for keyboard/screenreader
-        setTimeout(() => { try { bannerWrap.focus(); } catch (e) {} }, 0);
       }
     } catch (_) {}
 
@@ -878,6 +876,20 @@
     // Add to DOM and register event listeners
     document.body.appendChild(bannerContainer);
     bannerContainer.addEventListener('click', handleBannerClick);
+
+    // After rendering, move focus to the first actionable element for A11y
+    try {
+      const focusableSelectors = 'button, [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      const firstFocusable = bannerContainer.querySelector(focusableSelectors);
+      setTimeout(() => {
+        if (firstFocusable && typeof firstFocusable.focus === 'function') {
+          firstFocusable.focus();
+        } else {
+          const wrap = bannerContainer.querySelector('.uc-banner-wrap') || bannerContainer.firstElementChild;
+          if (wrap && typeof wrap.focus === 'function') wrap.focus();
+        }
+      }, 0);
+    } catch (_) {}
 
     // Focus trap within banner to avoid leaving without a decision
     const focusableSelectors = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
