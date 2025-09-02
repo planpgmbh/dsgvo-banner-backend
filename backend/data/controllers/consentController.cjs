@@ -10,8 +10,26 @@ const createConsentLog = catchAsync(async (req, res) => {
     ip = ip.substring(7);
   }
 
-  // Pseudonymize IP
-  const pseudoIp = ip.split('.').slice(0, 3).join('.') + '.XXX';
+  // Pseudonymize IP: mask only the last block (IPv4: last octet, IPv6: last hextet)
+  const pseudonymizeIp = (addr) => {
+    try {
+      if (!addr) return 'UNKNOWN';
+      if (addr.includes(':')) { // IPv6
+        const parts = addr.split(':');
+        // Replace only the last hextet with XXXX, keep others as-is
+        if (parts.length > 0) {
+          parts[parts.length - 1] = 'XXXX';
+          return parts.join(':');
+        }
+        return 'UNKNOWN';
+      }
+      // IPv4
+      const oct = addr.split('.');
+      if (oct.length === 4) return `${oct[0]}.${oct[1]}.${oct[2]}.XXX`;
+      return 'UNKNOWN';
+    } catch (_) { return 'UNKNOWN'; }
+  };
+  const pseudoIp = pseudonymizeIp(ip);
 
   // Get project expiry duration
   const [projects] = await pool.execute('SELECT expiry_months FROM projects WHERE id = ?', [project_id]);

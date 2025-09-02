@@ -6,6 +6,7 @@
   const SCRIPT_SELECTOR = 'script[src*="load.js"]';
   const CONSENT_COOKIE_NAME = 'dsgvo_consent';
   const BANNER_CONTAINER_ID = 'dsgvo-banner-container';
+  let DEBUG = false; // toggled via script param (?debug=1) or localStorage('dsgvo_debug')
 
   // Banner uses data-action attributes for button handling
   
@@ -22,12 +23,8 @@
     console.error('DSGVO Banner:', ...args);
   }
 
-  /**
-   * Debug logging temporarily enabled for troubleshooting.
-   */
-  function logInfo(...args) {
-    console.log('🔍 DSGVO DEBUG:', ...args);
-  }
+  /** Debug logging (enabled only if DEBUG=true) */
+  function logInfo(...args) { if (DEBUG) console.log('🔍 DSGVO DEBUG:', ...args); }
 
   /**
    * Replaces placeholders in the banner HTML with project-specific values.
@@ -478,6 +475,11 @@
     // Create modal content
     const modalContent = document.createElement('div');
     modalContent.className = 'uc-modal-content';
+    // Accessibility: role dialog, aria-modal, and focus management
+    modalContent.setAttribute('role', 'dialog');
+    modalContent.setAttribute('aria-modal', 'true');
+    modalContent.setAttribute('aria-labelledby', 'uc-details-title');
+    modalContent.tabIndex = -1;
     
     // Critical inline styles for modal content (protection against external CSS)
     modalContent.style.cssText = `
@@ -495,7 +497,7 @@
     // Generate content HTML
     let contentHTML = `
       <div class="uc-modal-header">
-        <div class="uc-modal-title">Cookie-Einstellungen</div>
+        <div id="uc-details-title" class="uc-modal-title">Cookie-Einstellungen</div>
         <button id="close-details-modal" class="uc-modal-close">&times;</button>
       </div>
       
@@ -516,7 +518,7 @@
       
       contentHTML += `
         <div class="uc-category-container">
-          <div class="uc-category-header" onclick="toggleCategoryDetails(${categoryIndex})" data-category-index="${categoryIndex}">
+          <div class="uc-category-header" role="button" tabindex="0" aria-expanded="false" aria-controls="category-details-${categoryIndex}" onclick="toggleCategoryDetails(${categoryIndex})" data-category-index="${categoryIndex}">
             <div class="uc-category-top">
               <div class="uc-category-title">
                 ${categoryServices.length > 0 ? `<span class="uc-toggle-arrow" id="arrow-${categoryIndex}">></span>` : ''}
@@ -537,7 +539,7 @@
             ${isRequired ? '<div class="uc-service-info">Erforderlich (kann nicht deaktiviert werden)</div>' : ''}
             
             ${categoryServices.length > 0 ? `
-              <div id="category-details-${categoryIndex}" class="uc-services-details" style="display: none;">
+              <div id="category-details-${categoryIndex}" class="uc-services-details" role="region" aria-labelledby="arrow-${categoryIndex}" style="display: none;">
             ` : ''}
       `;
       
@@ -621,6 +623,7 @@
     window.toggleCategoryDetails = (categoryIndex) => {
       const detailsDiv = document.getElementById(`category-details-${categoryIndex}`);
       const arrow = document.getElementById(`arrow-${categoryIndex}`);
+      const header = modalContent.querySelector(`.uc-category-header[data-category-index="${categoryIndex}"]`);
       
       if (detailsDiv && arrow) {
         const isVisible = detailsDiv.style.display !== 'none';
@@ -628,6 +631,7 @@
         detailsDiv.style.display = isVisible ? 'none' : 'block';
         arrow.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(90deg)';
         arrow.textContent = '>';
+        if (header) header.setAttribute('aria-expanded', String(!isVisible));
       }
     };
     
@@ -742,6 +746,52 @@
     
     // Inject into DOM
     document.body.appendChild(modal);
+
+    // Focus handling and trap inside modal
+    const focusableSelectors = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const getFocusable = () => Array.from(modal.querySelectorAll(focusableSelectors)).filter(el => el.offsetParent !== null);
+    const focusables = getFocusable();
+    const firstFocusable = focusables[0] || modalContent;
+    const lastFocusable = focusables[focusables.length - 1] || modalContent;
+    // Initial focus
+    setTimeout(() => {
+      (modalContent.querySelector('#close-details-modal') || firstFocusable).focus();
+    }, 0);
+
+    const handleTabTrap = (e) => {
+      if (e.key !== 'Tab') return;
+      const items = getFocusable();
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    modal.addEventListener('keydown', handleTabTrap);
+
+    // Keyboard support for category headers (Enter/Space to toggle)
+    modalContent.querySelectorAll('.uc-category-header').forEach((headerEl) => {
+      headerEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const idx = parseInt(headerEl.getAttribute('data-category-index') || '-1', 10);
+          if (!isNaN(idx) && typeof window.toggleCategoryDetails === 'function') {
+            window.toggleCategoryDetails(idx);
+            // Update aria-expanded state
+            const panel = document.getElementById(`category-details-${idx}`);
+            if (panel) {
+              const expanded = panel.style.display !== 'none';
+              headerEl.setAttribute('aria-expanded', String(expanded));
+            }
+          }
+        }
+      });
+    });
     
   }
 
@@ -778,6 +828,19 @@
       ${processedHtml}
     `;
 
+    // Accessibility: ensure banner wrapper is a dialog with proper labelling
+    try {
+      const bannerWrap = bannerContainer.querySelector('.uc-banner-wrap') || bannerContainer.firstElementChild;
+      if (bannerWrap) {
+        if (!bannerWrap.getAttribute('role')) bannerWrap.setAttribute('role', 'dialog');
+        bannerWrap.setAttribute('aria-modal', 'true');
+        if (!bannerWrap.getAttribute('aria-labelledby')) bannerWrap.setAttribute('aria-labelledby', 'uc-title');
+        if (!bannerWrap.hasAttribute('tabindex')) bannerWrap.tabIndex = -1;
+        // Move focus to banner for keyboard/screenreader
+        setTimeout(() => { try { bannerWrap.focus(); } catch (e) {} }, 0);
+      }
+    } catch (_) {}
+
     // Insert category switches dynamically BEFORE adding to DOM
     insertCategorySwitches(bannerContainer);
     
@@ -787,6 +850,25 @@
     // Add to DOM and register event listeners
     document.body.appendChild(bannerContainer);
     bannerContainer.addEventListener('click', handleBannerClick);
+
+    // Focus trap within banner to avoid leaving without a decision
+    const focusableSelectors = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const getFocusable = () => Array.from(bannerContainer.querySelectorAll(focusableSelectors)).filter(el => el.offsetParent !== null);
+    const trapHandler = (e) => {
+      if (e.key !== 'Tab') return;
+      const items = getFocusable();
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    bannerContainer.addEventListener('keydown', trapHandler);
   }
 
   /**
@@ -803,6 +885,8 @@
       const url = new URL(scriptTag.src);
       projectId = url.searchParams.get('id');
       scriptOrigin = url.origin;
+      // Enable debug logs via query (?debug=1) or localStorage('dsgvo_debug')
+      DEBUG = (url.searchParams.get('debug') === '1') || Boolean(localStorage.getItem('dsgvo_debug'));
     } catch (e) {
       return logError('Invalid script URL.', e.message);
     }
@@ -857,7 +941,7 @@
 
   // --- Script Execution ---
 
-  console.log('🚀 DSGVO Banner Script loaded!');
+  logInfo('🚀 DSGVO Banner Script loaded!');
   logInfo('Script readyState:', document.readyState);
 
   if (document.readyState === 'loading') {

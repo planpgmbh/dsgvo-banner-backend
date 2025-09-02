@@ -13,9 +13,20 @@ const getPublicProjectConfig = catchAsync(async (req, res) => {
   }
 
   const [categories] = await pool.execute('SELECT * FROM cookie_categories WHERE project_id = ? ORDER BY sort_order', [id]);
-  const [services] = await pool.execute('SELECT * FROM cookie_services WHERE project_id = ? ORDER BY name', [id]);
+  const [servicesRaw] = await pool.execute('SELECT * FROM cookie_services WHERE project_id = ? ORDER BY name', [id]);
 
   const project = projects[0];
+  // Synchronize consent cookie retention display with expiry_months when missing
+  const services = servicesRaw.map(svc => {
+    try {
+      const names = (svc.cookie_names || '').toLowerCase();
+      const isConsentCookie = names.includes('dsgvo_consent');
+      if (isConsentCookie && (!svc.retention_period || svc.retention_period.trim() === '')) {
+        return { ...svc, retention_period: `${project.expiry_months || 12} Monate` };
+      }
+    } catch (_) {}
+    return svc;
+  });
   res.json({
     banner_html: project.custom_html,
     banner_css: project.custom_css,

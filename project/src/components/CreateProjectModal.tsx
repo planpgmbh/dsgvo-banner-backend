@@ -17,7 +17,8 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     banner_text: 'Wir verwenden Cookies, um Inhalte und Anzeigen zu personalisieren, Funktionen für soziale Medien anbieten zu können und die Zugriffe auf unsere Website zu analysieren. Außerdem geben wir Informationen zu Ihrer Verwendung unserer Website an unsere Partner für soziale Medien, Werbung und Analysen weiter. <a class="uc-link" href="#" id="cookie-details">Details zeigen</a>',
     accept_all_text: 'Cookies zulassen',
     accept_selection_text: 'Auswahl erlauben',
-    necessary_only_text: 'Nur notwendige Cookies verwenden',
+    // Gleichwertige Ablehnung als Default-Text
+    necessary_only_text: 'Alle ablehnen',
     language: 'de',
     expiry_months: 12,
     about_cookies_text: 'Cookies sind kleine Textdateien, die von Websites verwendet werden, um die Benutzererfahrung effizienter zu gestalten. Laut Gesetz können wir Cookies auf Ihrem Gerät speichern, wenn diese für den Betrieb dieser Seite unbedingt notwendig sind. Für alle anderen Cookie-Typen benötigen wir Ihre Erlaubnis.',
@@ -40,8 +41,9 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       </div>
 
       <div class="uc-cta">
+        <!-- Gleichwertige Darstellung der Hauptentscheidungen -->
         <button class="uc-btn uc-btn-primary" data-action="acceptAll">[#ACCEPT_ALL_TEXT#]</button>
-        <button class="uc-btn uc-btn-secondary" data-action="necessaryOnly">[#NECESSARY_ONLY_TEXT#]</button>
+        <button class="uc-btn uc-btn-primary" data-action="necessaryOnly">[#NECESSARY_ONLY_TEXT#]</button>
         <button class="uc-btn uc-btn-outline" data-action="acceptSelection">[#ACCEPT_SELECTION_TEXT#]</button>
       </div>
     </section>
@@ -277,6 +279,12 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 .uc-btn-outline:hover {
   background: #f9fafb; /* Leicht grau bei Hover */
   border-color: #9ca3af;
+}
+
+/* Sichtbarer Fokus für Tastaturnutzung */
+.uc-btn:focus-visible, .uc-link:focus-visible, .uc-switch input:focus-visible, .uc-category-toggle input:focus-visible, .uc-modal-close:focus-visible {
+  outline: 3px solid rgba(10,73,255,0.5);
+  outline-offset: 2px;
 }
 
 /* RESPONSIVE - Mobile Ansicht */
