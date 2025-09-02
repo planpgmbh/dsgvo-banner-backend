@@ -41,25 +41,38 @@ const getProjectAnalytics = catchAsync(async (req, res) => {
     GROUP BY is_accept_all
   `, [projectId]);
 
-  // Category acceptance rates  
+  // Category acceptance rates with German translations
   const [categoryStats] = await pool.execute(`
     SELECT 
       category_name,
+      category_name_de,
       SUM(CASE WHEN JSON_CONTAINS(JSON_EXTRACT(consents, '$.accepted_category_names'), JSON_QUOTE(category_name)) THEN 1 ELSE 0 END) as accepted_count,
       COUNT(*) as total_consents,
       ROUND(
-        (SUM(CASE WHEN JSON_CONTAINS(JSON_EXTRACT(consents, '$.accepted_category_names'), JSON_QUOTE(category_name)) THEN 1 ELSE 0 END) * 100.0) / COUNT(*), 
-        2
+        CASE 
+          WHEN COUNT(*) > 0 THEN
+            (SUM(CASE WHEN JSON_CONTAINS(JSON_EXTRACT(consents, '$.accepted_category_names'), JSON_QUOTE(category_name)) THEN 1 ELSE 0 END) * 100.0) / COUNT(*)
+          ELSE 0 
+        END, 
+        1
       ) as acceptance_rate
     FROM consent_logs cl
     CROSS JOIN (
-      SELECT 'necessary' as category_name
-      UNION SELECT 'preferences'  
-      UNION SELECT 'analytics'
-      UNION SELECT 'marketing'
+      SELECT 'necessary' as category_name, 'Notwendig' as category_name_de
+      UNION SELECT 'preferences', 'Präferenzen'
+      UNION SELECT 'analytics', 'Statistiken'
+      UNION SELECT 'marketing', 'Marketing'
     ) categories
     WHERE cl.project_id = ?
-    GROUP BY category_name
+    GROUP BY category_name, category_name_de
+    ORDER BY 
+      CASE category_name 
+        WHEN 'necessary' THEN 1 
+        WHEN 'preferences' THEN 2 
+        WHEN 'analytics' THEN 3 
+        WHEN 'marketing' THEN 4 
+        ELSE 5 
+      END
   `, [projectId]);
 
   // Daily consent trends (last 30 days)

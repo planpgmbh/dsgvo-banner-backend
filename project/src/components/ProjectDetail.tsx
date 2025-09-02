@@ -46,6 +46,7 @@ interface AnalyticsData {
   }>;
   categoryStats: Array<{
     category_name: string;
+    category_name_de: string;
     accepted_count: number;
     total_consents: number;
     acceptance_rate: number;
@@ -1335,17 +1336,17 @@ function acceptAllCookies() {
                     {analyticsData.categoryStats.map((category) => (
                       <div key={category.category_name} className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex justify-between items-center mb-2">
-                          <h5 className="font-medium text-gray-900 capitalize">
-                            {category.category_name}
+                          <h5 className="font-medium text-gray-900">
+                            {category.category_name_de || category.category_name}
                           </h5>
                           <span className="text-sm font-bold text-blue-600">
-                            {category.acceptance_rate}%
+                            {Number(category.acceptance_rate).toFixed(1)}%
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div 
-                            className="bg-blue-600 h-2 rounded-full" 
-                            style={{ width: `${category.acceptance_rate}%` }}
+                            className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                            style={{ width: `${Math.min(100, Math.max(0, Number(category.acceptance_rate) || 0))}%` }}
                           ></div>
                         </div>
                         <div className="text-xs text-gray-500 mt-1">
