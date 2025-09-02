@@ -33,7 +33,7 @@ const getProjectAnalytics = catchAsync(async (req, res) => {
 
   // Accept All vs Selective consents
   // Use JSON boolean comparison to avoid CAST issues with true/false
-  const [consentTypes] = await pool.execute(`
+  const [consentTypesRaw] = await pool.execute(`
     SELECT 
       CASE WHEN JSON_EXTRACT(consents, '$.is_accept_all') = true THEN 1 ELSE 0 END as is_accept_all,
       COUNT(*) as count
@@ -44,7 +44,7 @@ const getProjectAnalytics = catchAsync(async (req, res) => {
 
 
   // Daily consent trends (last 30 days)
-  const [dailyTrends] = await pool.execute(`
+  const [dailyTrendsRaw] = await pool.execute(`
     SELECT 
       DATE(created_at) as date,
       COUNT(*) as total_consents,
@@ -56,9 +56,20 @@ const getProjectAnalytics = catchAsync(async (req, res) => {
     ORDER BY date DESC
   `, [projectId]);
 
+    // Normalize numeric types (MySQL may return strings)
+    const totalConsentCount = Number(totalConsents[0].total) || 0;
+    const consentTypes = consentTypesRaw.map(row => ({
+      is_accept_all: Number(row.is_accept_all),
+      count: Number(row.count) || 0
+    }));
+    const dailyTrends = dailyTrendsRaw.map(row => ({
+      date: row.date,
+      total_consents: Number(row.total_consents) || 0,
+      accept_all_count: Number(row.accept_all_count) || 0,
+      selective_count: Number(row.selective_count) || 0,
+    }));
+
     // Calculate summary statistics with percentages
-    const totalConsentCount = totalConsents[0].total;
-    // Rows return is_accept_all as 1 or 0; select explicitly
     const acceptAllRow = consentTypes.find(row => row.is_accept_all === 1);
     const selectiveRow = consentTypes.find(row => row.is_accept_all === 0);
     const acceptAllCount = acceptAllRow ? acceptAllRow.count : 0;
