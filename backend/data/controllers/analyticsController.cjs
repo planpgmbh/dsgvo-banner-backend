@@ -41,39 +41,6 @@ const getProjectAnalytics = catchAsync(async (req, res) => {
     GROUP BY is_accept_all
   `, [projectId]);
 
-  // Category acceptance rates with German translations
-  const [categoryStats] = await pool.execute(`
-    SELECT 
-      category_name,
-      category_name_de,
-      SUM(CASE WHEN JSON_CONTAINS(JSON_EXTRACT(consents, '$.accepted_category_names'), JSON_QUOTE(category_name)) THEN 1 ELSE 0 END) as accepted_count,
-      COUNT(*) as total_consents,
-      ROUND(
-        CASE 
-          WHEN COUNT(*) > 0 THEN
-            (SUM(CASE WHEN JSON_CONTAINS(JSON_EXTRACT(consents, '$.accepted_category_names'), JSON_QUOTE(category_name)) THEN 1 ELSE 0 END) * 100.0) / COUNT(*)
-          ELSE 0 
-        END, 
-        1
-      ) as acceptance_rate
-    FROM consent_logs cl
-    CROSS JOIN (
-      SELECT 'necessary' as category_name, 'Notwendig' as category_name_de
-      UNION SELECT 'preferences', 'Präferenzen'
-      UNION SELECT 'analytics', 'Statistiken'
-      UNION SELECT 'marketing', 'Marketing'
-    ) categories
-    WHERE cl.project_id = ?
-    GROUP BY category_name, category_name_de
-    ORDER BY 
-      CASE category_name 
-        WHEN 'necessary' THEN 1 
-        WHEN 'preferences' THEN 2 
-        WHEN 'analytics' THEN 3 
-        WHEN 'marketing' THEN 4 
-        ELSE 5 
-      END
-  `, [projectId]);
 
   // Daily consent trends (last 30 days)
   const [dailyTrends] = await pool.execute(`
@@ -88,17 +55,25 @@ const getProjectAnalytics = catchAsync(async (req, res) => {
     ORDER BY date DESC
   `, [projectId]);
 
+    // Calculate summary statistics with percentages
+    const totalConsentCount = totalConsents[0].total;
+    const acceptAllCount = consentTypes.find(row => row.is_accept_all)?.count || 0;
+    const selectiveCount = consentTypes.find(row => !row.is_accept_all)?.count || 0;
+    
     const analytics = {
-      totalConsents: totalConsents[0].total,
+      totalConsents: totalConsentCount,
       consentTypes: consentTypes.map(row => ({
         type: row.is_accept_all ? 'accept_all' : 'selective',
-        count: row.count
+        count: row.count,
+        percentage: totalConsentCount > 0 ? Math.round((row.count / totalConsentCount) * 100) : 0
       })),
-      categoryStats: categoryStats,
       dailyTrends: dailyTrends,
       summary: {
-        acceptAllRate: consentTypes.find(row => row.is_accept_all)?.count || 0,
-        selectiveRate: consentTypes.find(row => !row.is_accept_all)?.count || 0
+        acceptAllRate: acceptAllCount,
+        acceptAllPercentage: totalConsentCount > 0 ? Math.round((acceptAllCount / totalConsentCount) * 100) : 0,
+        selectiveRate: selectiveCount,
+        selectivePercentage: totalConsentCount > 0 ? Math.round((selectiveCount / totalConsentCount) * 100) : 0,
+        totalConsents: totalConsentCount
       }
     };
 
@@ -110,11 +85,13 @@ const getProjectAnalytics = catchAsync(async (req, res) => {
     res.json({
       totalConsents: 0,
       consentTypes: [],
-      categoryStats: [],
       dailyTrends: [],
       summary: {
         acceptAllRate: 0,
-        selectiveRate: 0
+        acceptAllPercentage: 0,
+        selectiveRate: 0,
+        selectivePercentage: 0,
+        totalConsents: 0
       },
       error: 'Analytics temporarily unavailable'
     });

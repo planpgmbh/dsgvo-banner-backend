@@ -44,13 +44,6 @@ interface AnalyticsData {
     type: 'accept_all' | 'selective';
     count: number;
   }>;
-  categoryStats: Array<{
-    category_name: string;
-    category_name_de: string;
-    accepted_count: number;
-    total_consents: number;
-    acceptance_rate: number;
-  }>;
   dailyTrends: Array<{
     date: string;
     total_consents: number;
@@ -59,7 +52,10 @@ interface AnalyticsData {
   }>;
   summary: {
     acceptAllRate: number;
+    acceptAllPercentage: number;
     selectiveRate: number;
+    selectivePercentage: number;
+    totalConsents: number;
   };
 }
 
@@ -1300,18 +1296,24 @@ function acceptAllCookies() {
                     </div>
                     <div className="bg-green-50 p-4 rounded-lg">
                       <div className="text-2xl font-bold text-green-600">
-                        {analyticsData?.summary?.acceptAllRate || 0}
+                        {analyticsData?.summary?.acceptAllPercentage || 0}%
                       </div>
                       <div className="text-sm text-green-600">
                         "Alle akzeptieren"
                       </div>
+                      <div className="text-xs text-green-500 mt-1">
+                        ({analyticsData?.summary?.acceptAllRate || 0} von {analyticsData?.summary?.totalConsents || 0})
+                      </div>
                     </div>
                     <div className="bg-orange-50 p-4 rounded-lg">
                       <div className="text-2xl font-bold text-orange-600">
-                        {analyticsData?.summary?.selectiveRate || 0}
+                        {analyticsData?.summary?.selectivePercentage || 0}%
                       </div>
                       <div className="text-sm text-orange-600">
                         Individuelle Auswahl
+                      </div>
+                      <div className="text-xs text-orange-500 mt-1">
+                        ({analyticsData?.summary?.selectiveRate || 0} von {analyticsData?.summary?.totalConsents || 0})
                       </div>
                     </div>
                     <div className="bg-purple-50 p-4 rounded-lg">
@@ -1326,37 +1328,6 @@ function acceptAllCookies() {
                 )}
               </div>
               
-              {/* Kategorie-Statistiken */}
-              {analyticsData?.categoryStats && analyticsData.categoryStats.length > 0 && (
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-4">
-                    Cookie-Kategorien Akzeptanzraten
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {analyticsData.categoryStats.map((category) => (
-                      <div key={category.category_name} className="bg-gray-50 p-4 rounded-lg">
-                        <div className="flex justify-between items-center mb-2">
-                          <h5 className="font-medium text-gray-900">
-                            {category.category_name_de || category.category_name}
-                          </h5>
-                          <span className="text-sm font-bold text-blue-600">
-                            {Number(category.acceptance_rate).toFixed(1)}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                            style={{ width: `${Math.min(100, Math.max(0, Number(category.acceptance_rate) || 0))}%` }}
-                          ></div>
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          {category.accepted_count} von {category.total_consents} Einwilligungen
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               <div>
                 <div className="flex items-center justify-between mb-4">

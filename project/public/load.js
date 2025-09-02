@@ -8,6 +8,9 @@
   const BANNER_CONTAINER_ID = 'dsgvo-banner-container';
 
   // Banner uses data-action attributes for button handling
+  
+  // Prevent multiple submissions
+  let consentProcessing = false;
 
   // --- Utility Functions ---
 
@@ -220,13 +223,19 @@
         
         // Load appropriate services based on consent
         loadConsentedServices(consentDetails.accepted_categories);
+        
+        // Reset processing flag
+        consentProcessing = false;
       } else {
         // This path might not be reached if the server returns non-2xx status
+        consentProcessing = false;
         logError('Failed to save consent.', data.error || 'Unknown error');
       }
     })
     .catch(error => {
       logError('Error sending consent.', error.message);
+      // Reset processing flag on error
+      consentProcessing = false;
     });
   }
 
@@ -235,6 +244,14 @@
   const dsgvoBannerAPI = {
     acceptAllCookies: () => {
       if (!bannerConfig) return logError('Configuration not loaded.');
+      if (consentProcessing) return; // Prevent multiple submissions
+      
+      consentProcessing = true;
+      
+      // Close banner immediately
+      const banner = document.getElementById(BANNER_CONTAINER_ID);
+      if (banner) banner.style.display = 'none';
+      
       const allServiceIds = bannerConfig.services.map(s => s.id);
       const allCategoryNames = bannerConfig.categories.map(c => c.name);
       sendConsent({
@@ -252,8 +269,15 @@
     
     acceptSelection: () => {
       if (!bannerConfig) return logError('Configuration not loaded.');
+      if (consentProcessing) return; // Prevent multiple submissions
+      
+      consentProcessing = true;
+      
       const banner = document.getElementById(BANNER_CONTAINER_ID);
       if (!banner) return logError('Banner container not found.');
+
+      // Close banner immediately
+      banner.style.display = 'none';
 
       const selectedCategoryIds = new Set();
       
@@ -286,6 +310,14 @@
 
     necessaryOnly: () => {
       if (!bannerConfig) return logError('Configuration not loaded.');
+      if (consentProcessing) return; // Prevent multiple submissions
+      
+      consentProcessing = true;
+      
+      // Close banner immediately
+      const banner = document.getElementById(BANNER_CONTAINER_ID);
+      if (banner) banner.style.display = 'none';
+      
       const necessaryCategory = bannerConfig.categories.find(c => c.required);
       if (!necessaryCategory) {
         // If no category is marked as required, send empty selection
