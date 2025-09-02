@@ -18,7 +18,9 @@ const createCookieServiceValidationRules = () => {
     // Optional fields
     body('cookie_names').optional().isString(),
     body('script_code').optional().isString(),
-    body('privacy_policy_url').optional().isURL().withMessage('Must be a valid URL'),
+    body('privacy_policy_url')
+      .optional({ nullable: true, checkFalsy: true })
+      .isURL().withMessage('Must be a valid URL'),
     body('retention_period').optional().isString(),
     body('purpose').optional().isString(),
   ];
@@ -35,7 +37,7 @@ const updateCookieServiceValidationRules = () => {
       body('category_id').optional().isInt({ min: 1 }),
       body('cookie_names').optional().isString(),
       body('script_code').optional().isString(),
-      body('privacy_policy_url').optional().isURL(),
+      body('privacy_policy_url').optional({ nullable: true, checkFalsy: true }).isURL(),
       body('retention_period').optional().isString(),
       body('purpose').optional().isString(),
     ];

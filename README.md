@@ -2,6 +2,41 @@
 
 Dieses Repository enthält ein vollständiges **DSGVO-konformes Cookie-Banner-System** mit erweiterten rechtlichen Compliance-Features, bestehend aus einem Admin-Panel zur Verwaltung und einem Backend zur Auslieferung der Banner-Konfigurationen und zur Speicherung von Einwilligungen.
 
+## 🧭 Codex Quickstart (Agent Onboarding)
+
+Die folgenden Schritte reichen, damit ein Agent wie Codex direkt loslegen kann:
+
+- Voraussetzungen: Docker + Docker Compose installiert
+- Dev-Start: `docker compose -f docker-compose-dev.yml up -d --build`
+- Health-Checks:
+  - Frontend/Nginx: `http://localhost:5173/`
+  - Test-Seite: `http://localhost:5173/einfacher-banner-test.html`
+  - Backend-API: `http://localhost:3001/api/config?id=1` (oder eine existierende Projekt-ID)
+- Admin-Login (JWT):
+  - Endpoint: `POST http://localhost:3001/api/auth/login`
+  - Default-User: `philipp`
+  - Default-Passwort: `admin123`
+- Dev-Projekt anlegen (optional):
+  - `POST /api/projects` mit JSON-Body (siehe Beispiel in `project/src/components/CreateProjectModal.tsx` für Default-HTML/CSS)
+  - Danach `GET /api/config?id=<PROJECT_ID>` prüfen
+- Wichtige Dateien/Orte:
+  - Backend Server: `backend/data/server.cjs`
+  - Öffentliche Routen: `backend/data/routes/publicRoutes.cjs`
+  - Projekte/Services/Analytics: `backend/data/controllers/*`
+  - Validierung: `backend/data/validators/*`
+  - Banner/Script (öffentlich): `project/public/load.js`
+  - Admin-UI (React): `project/src/*`
+  - Dev-Testseite: `einfacher-banner-test.html` (wird von Nginx bereitgestellt)
+- Debug:
+  - `load.js`-Logs aktivieren mit `?debug=1` am Script-Tag oder per `localStorage.setItem('dsgvo_debug','1')`
+- CSP/Nonce (optional):
+  - Script-Tag kann `nonce` tragen; `load.js` vererbt den Nonce an dynamisch eingefügte Service-Scripts
+- Consent-Versionierung:
+  - `load.js` speichert die Projektversion (`updated_at`) in den Consent-Details
+  - Bei Änderung wird ein Re‑Prompt erzwungen (Banner erscheint erneut)
+- DB-Schema-Hinweis:
+  - `backend/init.sql` läuft nur auf frischen Datenbanken. Bei Schema-Änderungen (z. B. neue Projektfelder) entweder DB-Volume erneuern oder `ALTER TABLE` manuell ausführen.
+
 ## 🚀 Core Features
 
 - **Zentrales Admin-Panel** zur Verwaltung mehrerer unabhängiger Projekte/Websites

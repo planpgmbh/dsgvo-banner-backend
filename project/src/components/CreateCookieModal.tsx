@@ -129,10 +129,10 @@ export const CreateCookieModal: React.FC<CreateCookieModalProps> = ({
       name: 'Matomo',
       description: 'Datenschutzfreundliche Web-Analyse-Software',
       provider: 'Eigener Server / Matomo',
-      cookie_names: '_pk_id, _pk_ses',
+      cookie_names: '_pk_id, _pk_ses, _pk_ref',
       purpose: 'Website-Analyse (datenschutzkonform)',
-      privacy_policy_url: '',
-      retention_period: '13 Monate'
+      privacy_policy_url: 'https://matomo.org/privacy-policy/',
+      retention_period: '13 Monate (_pk_id), 30 Minuten (_pk_ses)'
     }
   ];
 
