@@ -167,6 +167,8 @@
   let bannerConfig = null;
   let scriptOrigin = '';
   let projectId = '';
+  let lastFocusedElement = null; // for returning focus after modal
+  let liveRegion = null; // aria-live region for announcements
 
   /**
    * Sends the user's consent data to the server.
@@ -200,6 +202,13 @@
         } else {
           logInfo('❌ Banner element not found for hiding');
         }
+        // Announce success via aria-live
+        try {
+          if (liveRegion) {
+            liveRegion.textContent = 'Ihre Cookie-Einstellung wurde gespeichert.';
+            setTimeout(() => { if (liveRegion) liveRegion.textContent = ''; }, 4000);
+          }
+        } catch (_) {}
         
         // Store detailed consent information
         const consentDetails = {
@@ -432,7 +441,8 @@
   function showDetailsModal() {
     if (!bannerConfig) return logError('Configuration not loaded.');
     
-    // Remove existing modal if present
+    // Remember focus and remove existing modal if present
+    try { lastFocusedElement = document.activeElement; } catch (_) {}
     const existingModal = document.getElementById('dsgvo-details-modal');
     if (existingModal) existingModal.remove();
     
@@ -654,6 +664,8 @@
       modal.remove();
       // Clean up global function
       delete window.toggleCategoryDetails;
+      // Return focus to the element that opened the modal
+      try { if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') lastFocusedElement.focus(); } catch (_) {}
     };
     
     modal.addEventListener('click', (e) => {
@@ -834,7 +846,14 @@
       if (bannerWrap) {
         if (!bannerWrap.getAttribute('role')) bannerWrap.setAttribute('role', 'dialog');
         bannerWrap.setAttribute('aria-modal', 'true');
-        if (!bannerWrap.getAttribute('aria-labelledby')) bannerWrap.setAttribute('aria-labelledby', 'uc-title');
+        if (!bannerWrap.getAttribute('aria-labelledby')) {
+          const titleEl = bannerWrap.querySelector('#uc-title');
+          if (titleEl) {
+            bannerWrap.setAttribute('aria-labelledby', 'uc-title');
+          } else {
+            bannerWrap.setAttribute('aria-label', 'Cookie-Einstellungen');
+          }
+        }
         if (!bannerWrap.hasAttribute('tabindex')) bannerWrap.tabIndex = -1;
         // Move focus to banner for keyboard/screenreader
         setTimeout(() => { try { bannerWrap.focus(); } catch (e) {} }, 0);
@@ -901,6 +920,19 @@
     window.acceptAllCookies = dsgvoBannerAPI.acceptAllCookies;
     window.acceptSelection = dsgvoBannerAPI.acceptSelection;
     window.necessaryOnly = dsgvoBannerAPI.necessaryOnly;
+
+    // Create or get aria-live region for announcements
+    try {
+      liveRegion = document.getElementById('dsgvo-live');
+      if (!liveRegion) {
+        liveRegion = document.createElement('div');
+        liveRegion.id = 'dsgvo-live';
+        liveRegion.setAttribute('role', 'status');
+        liveRegion.setAttribute('aria-live', 'polite');
+        liveRegion.style.cssText = 'position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;';
+        document.body.appendChild(liveRegion);
+      }
+    } catch (_) {}
 
     // 3. Fetch configuration (always fetch, even if cookie exists for reopening functionality)
     const apiUrl = `${scriptOrigin}/api/config?id=${projectId}`;
