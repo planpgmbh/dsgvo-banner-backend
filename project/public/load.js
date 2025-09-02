@@ -23,10 +23,10 @@
   }
 
   /**
-   * Info logging disabled in production for performance.
+   * Debug logging temporarily enabled for troubleshooting.
    */
-  function logInfo() {
-    // Info logging disabled in production
+  function logInfo(...args) {
+    console.log('🔍 DSGVO DEBUG:', ...args);
   }
 
   /**
@@ -93,7 +93,6 @@
         }
       });
 
-      // Consent settings restored
     } catch (error) {
       logError('Failed to restore consent settings:', error.message);
     }
@@ -108,8 +107,6 @@
       return logError('No services configuration available');
     }
 
-    // Loading consented services
-    
     // Find accepted category IDs
     const acceptedCategoryIds = bannerConfig.categories
       .filter(cat => acceptedCategories.includes(cat.name))
@@ -124,8 +121,6 @@
     servicesToLoad.forEach(service => {
       loadService(service);
     });
-
-    // Services loaded successfully
   }
 
   /**
@@ -134,9 +129,7 @@
    */
   function loadService(service) {
     try {
-      if (!service.script_code) {
-        return; // Service has no script code
-      }
+      if (!service.script_code) return;
 
       // Create container for service scripts
       let serviceContainer = document.getElementById('dsgvo-services-container');
@@ -153,7 +146,6 @@
       serviceWrapper.innerHTML = service.script_code;
 
       serviceContainer.appendChild(serviceWrapper);
-      // Service loaded successfully
 
       // Execute any scripts in the service code
       const scripts = serviceWrapper.querySelectorAll('script');
@@ -184,6 +176,9 @@
    * @param {object} consentData - The consent payload.
    */
   function sendConsent(consentData) {
+    logInfo('🌐 sendConsent called with data:', consentData);
+    logInfo('📡 Making POST request to:', `${scriptOrigin}/api/consent`);
+    
     // Sending consent data to server
     fetch(`${scriptOrigin}/api/consent`, {
       method: 'POST',
@@ -198,9 +193,16 @@
       return response.json();
     })
     .then(data => {
+      logInfo('✅ API Response received:', data);
       if (data.success) {
+        logInfo('🎉 SUCCESS! Hiding banner');
         const banner = document.getElementById(BANNER_CONTAINER_ID);
-        if (banner) banner.style.display = 'none';
+        if (banner) {
+          banner.style.cssText = 'display: none !important;';
+          logInfo('✅ Banner hidden successfully');
+        } else {
+          logInfo('❌ Banner element not found for hiding');
+        }
         
         // Store detailed consent information
         const consentDetails = {
@@ -219,15 +221,12 @@
         const expires = new Date(Date.now() + expiryMonths * 30 * 24 * 60 * 60 * 1000).toUTCString();
         document.cookie = `${CONSENT_COOKIE_NAME}=true; expires=${expires}; path=/; SameSite=None; Secure`;
         
-        // Consent saved successfully
-        
         // Load appropriate services based on consent
         loadConsentedServices(consentDetails.accepted_categories);
         
         // Reset processing flag
         consentProcessing = false;
       } else {
-        // This path might not be reached if the server returns non-2xx status
         consentProcessing = false;
         logError('Failed to save consent.', data.error || 'Unknown error');
       }
@@ -243,17 +242,25 @@
 
   const dsgvoBannerAPI = {
     acceptAllCookies: () => {
-      if (!bannerConfig) return logError('Configuration not loaded.');
-      if (consentProcessing) return; // Prevent multiple submissions
+      logInfo('🚀 acceptAllCookies called');
+      if (!bannerConfig) {
+        logError('❌ Configuration not loaded');
+        return;
+      }
+      if (consentProcessing) {
+        logInfo('⏳ Already processing, skipping');
+        return;
+      }
       
+      logInfo('✅ Setting consentProcessing = true');
       consentProcessing = true;
       
-      // Close banner immediately
-      const banner = document.getElementById(BANNER_CONTAINER_ID);
-      if (banner) banner.style.display = 'none';
+      // Defensive programming: ensure arrays exist
+      const allServiceIds = (bannerConfig.services || []).map(s => s.id);
+      const allCategoryNames = (bannerConfig.categories || []).map(c => c.name);
       
-      const allServiceIds = bannerConfig.services.map(s => s.id);
-      const allCategoryNames = bannerConfig.categories.map(c => c.name);
+      logInfo('📤 Sending consent with services:', allServiceIds, 'categories:', allCategoryNames);
+      
       sendConsent({
         project_id: projectId,
         accepted_services: allServiceIds,
@@ -276,9 +283,6 @@
       const banner = document.getElementById(BANNER_CONTAINER_ID);
       if (!banner) return logError('Banner container not found.');
 
-      // Close banner immediately
-      banner.style.display = 'none';
-
       const selectedCategoryIds = new Set();
       
       // Find all checked category switches
@@ -288,15 +292,16 @@
         if (!isNaN(catId)) selectedCategoryIds.add(catId);
       });
 
-      // Always include the 'necessary' category
-      const necessaryCategory = bannerConfig.categories.find(c => c.required);
+      // Always include the 'necessary' category - defensive programming
+      const necessaryCategory = (bannerConfig.categories || []).find(c => c.required);
       if (necessaryCategory) selectedCategoryIds.add(necessaryCategory.id);
 
-      const acceptedServiceIds = bannerConfig.services
+      // Defensive programming: ensure arrays exist
+      const acceptedServiceIds = (bannerConfig.services || [])
         .filter(service => selectedCategoryIds.has(service.category_id))
         .map(service => service.id);
       
-      const acceptedCategoryNames = bannerConfig.categories
+      const acceptedCategoryNames = (bannerConfig.categories || [])
         .filter(c => selectedCategoryIds.has(c.id))
         .map(c => c.name);
 
@@ -314,18 +319,15 @@
       
       consentProcessing = true;
       
-      // Close banner immediately
-      const banner = document.getElementById(BANNER_CONTAINER_ID);
-      if (banner) banner.style.display = 'none';
-      
-      const necessaryCategory = bannerConfig.categories.find(c => c.required);
+      // Defensive programming: ensure arrays exist
+      const necessaryCategory = (bannerConfig.categories || []).find(c => c.required);
       if (!necessaryCategory) {
         // If no category is marked as required, send empty selection
         sendConsent({ project_id: projectId, accepted_services: [], accepted_category_names: [], is_accept_all: false });
         return;
       }
       
-      const necessaryServiceIds = bannerConfig.services
+      const necessaryServiceIds = (bannerConfig.services || [])
         .filter(s => s.category_id === necessaryCategory.id)
         .map(s => s.id);
 
@@ -366,14 +368,13 @@
         // Restore previous consent settings to switches
         restoreConsentSettings(bannerContainer);
         
-        // Banner reopened
       } else {
         logError('Cannot reopen banner: configuration not loaded.');
       }
     },
     close: () => {
       const banner = document.getElementById(BANNER_CONTAINER_ID);
-      if (banner) banner.style.display = 'none';
+      if (banner) banner.style.cssText = 'display: none !important;';
     },
     showDetails: () => {
       showDetailsModal();
@@ -385,29 +386,44 @@
    * @param {Event} event - The click event.
    */
   function handleBannerClick(event) {
+    logInfo('🔥 BUTTON CLICKED - Event fired');
     const target = event.target.closest('button, a');
-    if (!target) return;
+    if (!target) {
+      logInfo('❌ No button target found');
+      return;
+    }
+    
+    logInfo('✅ Button target found:', target.tagName, 'class:', target.className);
     
     // Handle details link
     if (target.id === 'cookie-details') {
       event.preventDefault();
+      logInfo('🔗 Details link clicked');
       showDetailsModal();
       return;
     }
 
     // Handle banner buttons
     const action = target.getAttribute('data-action');
+    logInfo('🎯 Button action:', action);
+    logInfo('📊 bannerConfig available:', !!bannerConfig);
+    logInfo('📋 consentProcessing status:', consentProcessing);
+    
     switch (action) {
       case 'acceptAll':
+        logInfo('➡️ Calling acceptAllCookies');
         dsgvoBannerAPI.acceptAllCookies();
         return;
       case 'acceptSelection':
+        logInfo('➡️ Calling acceptSelection');
         dsgvoBannerAPI.acceptSelection();
         return;
       case 'necessaryOnly':
+        logInfo('➡️ Calling necessaryOnly');
         dsgvoBannerAPI.necessaryOnly();
         return;
       case 'rejectAll':
+        logInfo('➡️ Calling rejectAllCookies');
         dsgvoBannerAPI.rejectAllCookies();
         return;
     }
@@ -727,7 +743,6 @@
     // Inject into DOM
     document.body.appendChild(modal);
     
-    // Details modal opened
   }
 
   /**
@@ -763,14 +778,15 @@
       ${processedHtml}
     `;
 
-    document.body.appendChild(bannerContainer);
-    bannerContainer.addEventListener('click', handleBannerClick);
-    
-    // Insert category switches dynamically
+    // Insert category switches dynamically BEFORE adding to DOM
     insertCategorySwitches(bannerContainer);
     
-    // Restore previous consent settings if banner is reopened
+    // Restore previous consent settings BEFORE adding to DOM  
     restoreConsentSettings(bannerContainer);
+    
+    // Add to DOM and register event listeners
+    document.body.appendChild(bannerContainer);
+    bannerContainer.addEventListener('click', handleBannerClick);
   }
 
   /**
@@ -810,12 +826,12 @@
         return response.json();
       })
       .then(config => {
+        logInfo('1. API Response received, setting bannerConfig');
         bannerConfig = config; // Always store config for potential reopening
+        logInfo('2. bannerConfig set with categories:', config.categories?.length, 'services:', config.services?.length);
         
         // 4. Check for existing consent cookie
         if (document.cookie.includes(`${CONSENT_COOKIE_NAME}=true`)) {
-          // Existing consent found, loading services
-          
           // Load services based on existing consent
           try {
             const savedDetails = localStorage.getItem(`${CONSENT_COOKIE_NAME}_details`);
@@ -830,7 +846,9 @@
         }
         
         // 5. Load banner if no consent cookie exists
+        logInfo('3. No consent cookie found, loading banner');
         loadBanner(config);
+        logInfo('4. Banner loaded, ready for interaction');
       })
       .catch(error => {
         logError('Failed to load configuration.', error.message);
@@ -839,9 +857,14 @@
 
   // --- Script Execution ---
 
+  console.log('🚀 DSGVO Banner Script loaded!');
+  logInfo('Script readyState:', document.readyState);
+
   if (document.readyState === 'loading') {
+    logInfo('Waiting for DOMContentLoaded...');
     document.addEventListener('DOMContentLoaded', init);
   } else {
+    logInfo('DOM already ready, initializing...');
     init();
   }
 

@@ -21,7 +21,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     language: 'de',
     expiry_months: 12,
     about_cookies_text: 'Cookies sind kleine Textdateien, die von Websites verwendet werden, um die Benutzererfahrung effizienter zu gestalten. Laut Gesetz können wir Cookies auf Ihrem Gerät speichern, wenn diese für den Betrieb dieser Seite unbedingt notwendig sind. Für alle anderen Cookie-Typen benötigen wir Ihre Erlaubnis.',
-    custom_html: `<div id="dsgvo-banner-container" class="uc-banner-wrap" role="dialog" aria-labelledby="uc-title" aria-describedby="uc-desc">
+    custom_html: `<div class="uc-banner-wrap" role="dialog" aria-labelledby="uc-title" aria-describedby="uc-desc">
     <section class="uc-banner">
       <div>
         <div id="uc-title" class="uc-headline">[#TITLE#]</div>

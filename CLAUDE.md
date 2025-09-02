@@ -68,6 +68,9 @@ npm run build
 # Linting
 npm run lint
 
+# TypeScript-Typprüfung
+npx tsc --noEmit
+
 # Preview von Production-Build
 npm run preview
 ```
@@ -206,6 +209,22 @@ Das Banner-System stellt folgende globale Funktionen zur Verfügung:
 - **Styling**: Tailwind CSS-Klassen
 - **State Management**: React useState/useEffect (kein externes State Management)
 
+## Testing & Debugging
+
+### Banner-Test-Dateien
+```bash
+# Einfacher Banner-Test (lokaler HTML-Test)
+open einfacher-banner-test.html
+
+# Mit Development-Server testen
+python3 -m http.server 8080
+# Dann http://localhost:8080/einfacher-banner-test.html
+```
+
+### Nginx-Konfiguration (Development)
+- `nginx-dev.conf` - Development-spezifische Nginx-Konfiguration
+- Unterscheidet sich von Production-Setup für lokale Tests
+
 ## Besondere Hinweise
 
 - **CORS-Konfiguration**: Backend hat offene CORS-Policy für öffentliche Banner-Integration
@@ -213,3 +232,4 @@ Das Banner-System stellt folgende globale Funktionen zur Verfügung:
 - **Traefik-Integration**: Production-Setup erwartet externe Traefik-Container mit `proxy`-Netzwerk
 - **Rate Limiting**: 100 Requests pro Minute pro IP
 - **SSL**: Wird über Traefik mit Let's Encrypt gehandhabt
+- **Module-Systeme**: Backend (CommonJS) vs Frontend (ESM) - unterschiedliche Import-Syntax beachten
