@@ -32,9 +32,10 @@ const getProjectAnalytics = catchAsync(async (req, res) => {
     );
 
   // Accept All vs Selective consents
+  // Use JSON boolean comparison to avoid CAST issues with true/false
   const [consentTypes] = await pool.execute(`
     SELECT 
-      CAST(JSON_EXTRACT(consents, '$.is_accept_all') AS UNSIGNED) as is_accept_all,
+      CASE WHEN JSON_EXTRACT(consents, '$.is_accept_all') = true THEN 1 ELSE 0 END as is_accept_all,
       COUNT(*) as count
     FROM consent_logs 
     WHERE project_id = ? 
@@ -47,8 +48,8 @@ const getProjectAnalytics = catchAsync(async (req, res) => {
     SELECT 
       DATE(created_at) as date,
       COUNT(*) as total_consents,
-      SUM(CASE WHEN CAST(JSON_EXTRACT(consents, '$.is_accept_all') AS UNSIGNED) = 1 THEN 1 ELSE 0 END) as accept_all_count,
-      SUM(CASE WHEN CAST(JSON_EXTRACT(consents, '$.is_accept_all') AS UNSIGNED) = 0 THEN 1 ELSE 0 END) as selective_count
+      SUM(CASE WHEN JSON_EXTRACT(consents, '$.is_accept_all') = true THEN 1 ELSE 0 END) as accept_all_count,
+      SUM(CASE WHEN JSON_EXTRACT(consents, '$.is_accept_all') = false THEN 1 ELSE 0 END) as selective_count
     FROM consent_logs 
     WHERE project_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
     GROUP BY DATE(created_at)
@@ -57,8 +58,11 @@ const getProjectAnalytics = catchAsync(async (req, res) => {
 
     // Calculate summary statistics with percentages
     const totalConsentCount = totalConsents[0].total;
-    const acceptAllCount = consentTypes.find(row => row.is_accept_all)?.count || 0;
-    const selectiveCount = consentTypes.find(row => !row.is_accept_all)?.count || 0;
+    // Rows return is_accept_all as 1 or 0; select explicitly
+    const acceptAllRow = consentTypes.find(row => row.is_accept_all === 1);
+    const selectiveRow = consentTypes.find(row => row.is_accept_all === 0);
+    const acceptAllCount = acceptAllRow ? acceptAllRow.count : 0;
+    const selectiveCount = selectiveRow ? selectiveRow.count : 0;
     
     const analytics = {
       totalConsents: totalConsentCount,
