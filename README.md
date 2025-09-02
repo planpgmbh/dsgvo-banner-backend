@@ -181,6 +181,44 @@ Die Buttons im Banner (z.B. "Alle akzeptieren") rufen ebenfalls globale Funktion
 
 - Drittanbieter-Dienste werden ausschließlich nach erteilter Einwilligung geladen. Vorher findet keine Script-Injektion statt; Preload/Prefetch wird nicht genutzt.
 
+## 🔐 Content Security Policy (CSP)
+
+Das Banner-Skript kann in Umgebungen mit strenger CSP betrieben werden:
+
+- Scripts: `load.js` kann optional einen Nonce an dynamisch eingefügte Service-Skripte weitergeben. Setzen Sie dazu entweder ein `nonce`-Attribut am `<script src=".../load.js">` oder übergeben Sie `?nonce=...` im Script-URL.
+- Styles: Das Banner injiziert CSS inline in einen `<style>`-Block; dafür ist i. d. R. `style-src 'unsafe-inline'` erforderlich.
+
+Beispiel-Header (vereinfacht):
+
+```
+Content-Security-Policy: \
+  default-src 'self'; \
+  script-src 'self' 'nonce-RANDOM123' https://dsgvobanner.plan-p.com; \
+  style-src 'self' 'unsafe-inline'; \
+  img-src 'self' data:; \
+  connect-src 'self' https://dsgvobanner.plan-p.com; \
+  frame-ancestors 'self';
+```
+
+Script-Tag mit Nonce:
+
+```
+<script src="https://dsgvobanner.plan-p.com/load.js?id=PROJECT_ID" nonce="RANDOM123"></script>
+```
+
+Alternativ per Query-Param:
+
+```
+<script src="https://dsgvobanner.plan-p.com/load.js?id=PROJECT_ID&nonce=RANDOM123"></script>
+```
+
+Hinweis: Der Nonce muss pro Response neu generiert werden und mit dem CSP-Header übereinstimmen.
+
+## ♻️ Consent-Versionierung
+
+- Jede Projektänderung besitzt einen `updated_at` Zeitstempel. `load.js` speichert die Version beim Consent.
+- Wenn sich die Version ändert, zeigt `load.js` das Banner erneut an (Re-Prompt), auch wenn das Consent-Cookie noch gültig ist.
+
 ## 🗃️ Datenbank-Schema
 
 Die Datenbank besteht aus den folgenden Haupttabellen:

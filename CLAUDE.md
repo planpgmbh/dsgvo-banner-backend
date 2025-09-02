@@ -135,6 +135,15 @@ Das `load.js`-Skript befindet sich in `/project/public/load.js` und wird über N
 - Aktivieren: `?debug=1` am Script-Tag oder `localStorage.setItem('dsgvo_debug','1')`.
 - Deaktivieren: `localStorage.removeItem('dsgvo_debug')`.
 
+### Content Security Policy (CSP)
+- Optionaler Nonce-Support für dynamische Service-Skripte: Script-Tag erhält `nonce`-Attribut oder `?nonce=` im URL.
+- Hinweis: Inline-Styles werden genutzt; `style-src 'unsafe-inline'` ist notwendig, falls kein Style-Nonce verwendet wird.
+
+Beispiel Script-Tag:
+```
+<script src="https://dsgvobanner.plan-p.com/load.js?id=123" nonce="RANDOM123"></script>
+```
+
 ### Globale JavaScript-Funktionen (load.js)
 Das Banner-System stellt folgende globale Funktionen zur Verfügung:
 - `window.dsgvoBanner.open()` - Banner erneut öffnen
@@ -170,7 +179,8 @@ Das Banner-System stellt folgende globale Funktionen zur Verfügung:
 - **Vollständige Consent-Historie** mit Zeitstempeln in LocalStorage
 - **Service-basiertes Script-Loading** nur bei erteilter Einwilligung
 - **LocalStorage-Details** für granulare Einwilligungsverfolgung
- - **Pseudonymisierung**: Nur letzter IP-Block wird maskiert (IPv4/IPv6)
+- **Pseudonymisierung**: Nur letzter IP-Block wird maskiert (IPv4/IPv6)
+ - **Consent-Versionierung**: Re-Prompt bei Projekt-Änderungen über `updated_at`
 
 ### 🔄 Technische Implementierung
 
