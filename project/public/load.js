@@ -877,19 +877,28 @@
     document.body.appendChild(bannerContainer);
     bannerContainer.addEventListener('click', handleBannerClick);
 
-    // After rendering, move focus to the first actionable element for A11y
-    try {
-      const focusableSelectors = 'button, [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-      const firstFocusable = bannerContainer.querySelector(focusableSelectors);
-      setTimeout(() => {
-        if (firstFocusable && typeof firstFocusable.focus === 'function') {
-          firstFocusable.focus();
-        } else {
-          const wrap = bannerContainer.querySelector('.uc-banner-wrap') || bannerContainer.firstElementChild;
-          if (wrap && typeof wrap.focus === 'function') wrap.focus();
-        }
-      }, 0);
-    } catch (_) {}
+    // Do not move focus immediately on open. On first TAB, focus "Details zeigen" (fallback: "Auswahl erlauben").
+    let primedForFirstTab = true;
+    const handleFirstTabIntoBanner = (e) => {
+      if (!primedForFirstTab) return;
+      if (e.key !== 'Tab') return;
+      const active = document.activeElement;
+      if (bannerContainer.contains(active)) {
+        primedForFirstTab = false; // already inside banner
+        document.removeEventListener('keydown', handleFirstTabIntoBanner, true);
+        return;
+      }
+      // Intercept first TAB and move focus into banner
+      e.preventDefault();
+      const details = bannerContainer.querySelector('#cookie-details');
+      const selectionBtn = bannerContainer.querySelector('[data-action="acceptSelection"]');
+      const generic = bannerContainer.querySelector('button, [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+      const target = details || selectionBtn || generic;
+      if (target && typeof target.focus === 'function') target.focus();
+      primedForFirstTab = false;
+      document.removeEventListener('keydown', handleFirstTabIntoBanner, true);
+    };
+    document.addEventListener('keydown', handleFirstTabIntoBanner, true);
 
     // Focus trap within banner to avoid leaving without a decision
     const focusableSelectors = 'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -909,6 +918,13 @@
       }
     };
     bannerContainer.addEventListener('keydown', trapHandler);
+    // Safety: disable the first-tab handler if banner is closed programmatically
+    const cleanupFirstTab = () => {
+      primedForFirstTab = false;
+      document.removeEventListener('keydown', handleFirstTabIntoBanner, true);
+      bannerContainer.removeEventListener('hide', cleanupFirstTab);
+    };
+    bannerContainer.addEventListener('hide', cleanupFirstTab);
   }
 
   /**
