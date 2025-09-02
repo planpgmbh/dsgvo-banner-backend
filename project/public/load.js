@@ -543,8 +543,9 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
     `;
     
-    // Generate content HTML
+    // Generate content HTML (include project CSS to ensure styles even if banner wasn't rendered)
     let contentHTML = `
+      <style>${(bannerConfig && bannerConfig.banner_css) || ''}</style>
       <div class="uc-modal-header">
         <div id="uc-details-title" class="uc-modal-title">Cookie-Einstellungen</div>
         <button id="close-details-modal" class="uc-modal-close">&times;</button>

@@ -1277,7 +1277,8 @@ function acceptAllCookies() {
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">
                   Fügen Sie im WordPress-Menü einen individuellen Link mit der URL <code>#cookie-settings</code> hinzu. 
-                  Das Fenster „Cookie‑Einstellungen“ öffnet sich automatisch, sobald das <code>load.js</code> geladen ist.
+                  Das Fenster „Cookie‑Einstellungen“ öffnet sich automatisch, sobald das <code>load.js</code> geladen ist. 
+                  Verwenden Sie vorzugsweise den relativen Hash (kein vollständiger URL-Link), damit die Seite nicht neu lädt.
                 </p>
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
                   <div className="flex items-center justify-between mb-2">
