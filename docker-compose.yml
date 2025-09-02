@@ -6,7 +6,7 @@ services:
     container_name: backend_dsgvobanner
     restart: unless-stopped
     ports:
-      - "3001:3001"
+      - "127.0.0.1:3001:3001"
     env_file:
       - .env
     labels:
@@ -23,6 +23,12 @@ services:
       - proxy
     depends_on:
       - db_dsgvobanner
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').request({host:'localhost',port:3001,path:'/'}, r=>{process.exit(0)}).on('error',()=>process.exit(1)).end()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
   www_dsgvobanner:
     build:
@@ -41,13 +47,19 @@ services:
       - "traefik.http.routers.www_dsgvobanner.tls.certresolver=http-resolver"
     networks:
       - proxy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost/ >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
   db_dsgvobanner:
     image: mariadb:11
     container_name: db_dsgvobanner
     restart: unless-stopped
     ports:
-      - "3318:3306"
+      - "127.0.0.1:3318:3306"
     env_file:
       - .env
     environment:
