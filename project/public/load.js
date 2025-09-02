@@ -153,6 +153,9 @@
         } else {
           newScript.textContent = script.textContent;
         }
+        if (scriptNonce) {
+          try { newScript.setAttribute('nonce', scriptNonce); } catch (_) {}
+        }
         document.head.appendChild(newScript);
       });
 
@@ -167,6 +170,7 @@
   let bannerConfig = null;
   let scriptOrigin = '';
   let projectId = '';
+  let scriptNonce = '';
   let lastFocusedElement = null; // for returning focus after modal
   let liveRegion = null; // aria-live region for announcements
 
@@ -215,7 +219,8 @@
           timestamp: new Date().toISOString(),
           accepted_categories: consentData.accepted_category_names || [],
           is_accept_all: consentData.is_accept_all || false,
-          expires_at: data.expires_at
+          expires_at: data.expires_at,
+          version: (bannerConfig && bannerConfig.project && bannerConfig.project.updated_at) || null
         };
         
         // Save to localStorage for detailed settings
@@ -906,6 +911,8 @@
       scriptOrigin = url.origin;
       // Enable debug logs via query (?debug=1) or localStorage('dsgvo_debug')
       DEBUG = (url.searchParams.get('debug') === '1') || Boolean(localStorage.getItem('dsgvo_debug'));
+      // CSP nonce: prefer attribute on the script tag, fallback to query param
+      scriptNonce = scriptTag.getAttribute('nonce') || url.searchParams.get('nonce') || '';
     } catch (e) {
       return logError('Invalid script URL.', e.message);
     }
@@ -948,17 +955,23 @@
         
         // 4. Check for existing consent cookie
         if (document.cookie.includes(`${CONSENT_COOKIE_NAME}=true`)) {
-          // Load services based on existing consent
+          let matchedVersion = false;
           try {
-            const savedDetails = localStorage.getItem(`${CONSENT_COOKIE_NAME}_details`);
-            if (savedDetails) {
-              const consentDetails = JSON.parse(savedDetails);
-              loadConsentedServices(consentDetails.accepted_categories);
+            const savedDetailsStr = localStorage.getItem(`${CONSENT_COOKIE_NAME}_details`);
+            if (savedDetailsStr) {
+              const consentDetails = JSON.parse(savedDetailsStr);
+              const currentVersion = config.project && config.project.updated_at;
+              if (consentDetails && consentDetails.version && currentVersion && consentDetails.version === currentVersion) {
+                matchedVersion = true;
+                loadConsentedServices(consentDetails.accepted_categories || []);
+              }
             }
           } catch (error) {
-            logError('Failed to load services from existing consent:', error.message);
+            logError('Failed to load services from existing consent/version:', error.message);
           }
-          return;
+          if (matchedVersion) return;
+          // Version missing/mismatch: fall through to show banner for re-consent
+          logInfo('Consent version missing/mismatch; prompting user again');
         }
         
         // 5. Load banner if no consent cookie exists
