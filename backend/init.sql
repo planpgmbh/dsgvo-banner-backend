@@ -18,12 +18,23 @@ CREATE TABLE IF NOT EXISTS `projects` (
   `expiry_months` INT DEFAULT 12,
   `active` BOOLEAN DEFAULT true,
   `about_cookies_text` TEXT,
+  -- Optional: Verantwortlicher & Datenschutzerklärung
+  `controller_name` VARCHAR(255),
+  `controller_email` VARCHAR(255),
+  `controller_address` VARCHAR(1024),
+  `privacy_policy_url` VARCHAR(2048),
   `custom_html` TEXT,
   `custom_css` TEXT,
   `custom_js` TEXT,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+-- Backfill for existing installations: add columns if they don't exist
+ALTER TABLE `projects` ADD COLUMN IF NOT EXISTS `controller_name` VARCHAR(255);
+ALTER TABLE `projects` ADD COLUMN IF NOT EXISTS `controller_email` VARCHAR(255);
+ALTER TABLE `projects` ADD COLUMN IF NOT EXISTS `controller_address` VARCHAR(1024);
+ALTER TABLE `projects` ADD COLUMN IF NOT EXISTS `privacy_policy_url` VARCHAR(2048);
 
 CREATE TABLE IF NOT EXISTS `cookie_categories` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,

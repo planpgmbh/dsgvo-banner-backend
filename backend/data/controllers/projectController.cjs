@@ -46,6 +46,10 @@ const createProject = catchAsync(async (req, res) => {
     name, domain, banner_title, banner_text, accept_all_text,
     accept_selection_text, necessary_only_text, language, expiry_months,
     about_cookies_text = '', // Default to empty string
+    controller_name = null,
+    controller_email = null,
+    controller_address = null,
+    privacy_policy_url = null,
     custom_html = '',      // Default to empty string
     custom_css = '',       // Default to empty string
     custom_js = ''         // Default to empty string
@@ -63,12 +67,14 @@ const createProject = catchAsync(async (req, res) => {
       INSERT INTO projects (
         name, domain, banner_title, banner_text, accept_all_text,
         accept_selection_text, necessary_only_text, language, expiry_months,
-        about_cookies_text, custom_html, custom_css, custom_js
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        about_cookies_text, controller_name, controller_email, controller_address, privacy_policy_url,
+        custom_html, custom_css, custom_js
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       name, domain, banner_title, banner_text, accept_all_text,
       accept_selection_text, necessary_only_text, language, expiry_months,
-      about_cookies_text, custom_html, custom_css, custom_js
+      about_cookies_text, controller_name, controller_email, controller_address, privacy_policy_url,
+      custom_html, custom_css, custom_js
     ]);
 
     const projectId = result.insertId;

@@ -519,6 +519,8 @@
       <div class="uc-modal-body">
         <div class="uc-modal-intro">
           <div>${bannerConfig.project.about_cookies_text || 'Cookies sind kleine Textdateien, die von Websites verwendet werden, um die Benutzererfahrung zu verbessern.'}</div>
+          ${bannerConfig.project.controller_name ? `<div class="uc-service-info" style="margin-top:10px;"><strong>Verantwortlicher:</strong><br><span style="color:#777;">${bannerConfig.project.controller_name}${bannerConfig.project.controller_email ? ' · ' + bannerConfig.project.controller_email : ''}${bannerConfig.project.controller_address ? '<br>'+bannerConfig.project.controller_address.replace(/\n/g,'<br>') : ''}</span></div>` : ''}
+          ${bannerConfig.project.privacy_policy_url ? `<div class="uc-service-info" style="margin-top:6px;"><a href="${bannerConfig.project.privacy_policy_url}" target="_blank" rel="noopener noreferrer" class="uc-service-link">Datenschutzerklärung ansehen →</a></div>` : ''}
         </div>
     `;
     
